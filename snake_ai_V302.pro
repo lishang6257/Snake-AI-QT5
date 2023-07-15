@@ -10,11 +10,13 @@ CONFIG += c++17
 
 SOURCES += \
     astar.cpp \
+    bfs.cpp \
     main.cpp \
     snakegame.cpp
 
 HEADERS += \
     astar.h \
+    bfs.h \
     snakegame.h
 
 FORMS += \

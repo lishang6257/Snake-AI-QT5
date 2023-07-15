@@ -2,20 +2,22 @@
 #include <QHash>
 #include <cmath>
 
-const int UNIT_COUNT_X = 30;
-const int UNIT_COUNT_Y = 20;
+extern const int UNIT_COUNT_X;
+extern const int UNIT_COUNT_Y;
 
 AStar::AStar()
 {
 
 }
 
-QVector<QPoint> AStar::getPath() const
-{
-    return path;
-}
+//QVector<QPoint> AStar::getPath() const
+//{
+////    if(!path.empty())
+//        return path;
+////    return SearchedButNotFoundLongestPath;
+//}
 
-void AStar::findPath(const QPoint& start, const QPoint& goal, const QVector<QPoint>& obstacles)
+QVector<QPoint> AStar::findPath(const QPoint& start, const QPoint& goal, const QVector<QPoint>& obstacles)
 {
     path.clear();
 
@@ -47,7 +49,6 @@ void AStar::findPath(const QPoint& start, const QPoint& goal, const QVector<QPoi
                 path.prepend(currentPoint);
                 currentPoint = parentMap[currentPoint];
             }
-            path.prepend(start);
             break;
         }
 
@@ -77,6 +78,24 @@ void AStar::findPath(const QPoint& start, const QPoint& goal, const QVector<QPoi
             }
         }
     }
+    // Reconstruct the path
+    if (path.empty()) {
+        int maxFScore = INT_MIN;
+        QPoint currentPoint;
+        for (const auto& point : closedList) {
+            if (fScore[point] > maxFScore) {
+                maxFScore = fScore[point];
+                currentPoint = point;
+            }
+        }
+
+        while (currentPoint != start) {
+            path.prepend(currentPoint);
+            currentPoint = parentMap[currentPoint];
+        }
+    }
+
+    return path;
 }
 
 int AStar::heuristic(const QPoint& point, const QPoint& goal) const

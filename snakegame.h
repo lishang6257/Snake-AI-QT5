@@ -10,6 +10,7 @@
 #include <QDateTime>
 
 #include "astar.h"
+#include "bfs.h"
 
 
 class SnakeGame : public QMainWindow
@@ -34,24 +35,34 @@ private:
 
     enum class GameMode {
         Mode1,
-        Mode2
+        Mode2,
+        Mode3
     };
 
     QVector<QPoint> snake;
+    QVector<QPoint> boarderObstacles;
     Direction snakeDirection;
     QTimer *gameTimer;
     QPoint food;
     int score;
     GameMode currentMode;
     QDateTime startTime;
+
     AStar astar;
     QVector<QPoint> AStarPath; // 存储A*算法找到的路径
 
+    BFS bfs;
+    QVector<QPoint> BFSPath; // 存储A*算法找到的路径
+
     void updateGame();
     void generateFood();
+    void BFSFindFood();
+    void AStarFindFood();
+    void AutoChangeSnakeDirection(const QVector<QPoint>& path);
     bool isGameOver(const QPoint& head);
-    void startMode1();
-    void startMode2();
+    void startMode(GameMode gm,int gameTimeInterval = 10);
+
+    int evaluateAutoAI(GameMode gm, int times = 20, int gameTimeInterval = 5);
 };
 
 #endif // SNAKEGAME_H
