@@ -2,14 +2,15 @@
 #define SNAKEGAME_H
 
 #include <QMainWindow>
+#include <QKeyEvent>
 #include <QTimer>
 #include <QVector>
 #include <QPoint>
-#include <QKeyEvent>
+#include <QMouseEvent>
 #include <QDateTime>
-#include <QMessageBox>
-#include <QPainter>
-#include <QPaintEvent>
+
+#include "astar.h"
+
 
 class SnakeGame : public QMainWindow
 {
@@ -21,32 +22,36 @@ public:
 protected:
     void paintEvent(QPaintEvent *event) override;
     void keyPressEvent(QKeyEvent *event) override;
-
-private slots:
-    void updateGame();
+    void mousePressEvent(QMouseEvent *event) override;
 
 private:
-    static constexpr int WIDTH = 400;         // 游戏窗口宽度
-    static constexpr int HEIGHT = 400;        // 游戏窗口高度
-    static constexpr int UNIT_SIZE = 20;      // 单元格大小
-    static constexpr int UNIT_COUNT_X = WIDTH / UNIT_SIZE;   // 单元格数量（水平方向）
-    static constexpr int UNIT_COUNT_Y = HEIGHT / UNIT_SIZE;  // 单元格数量（垂直方向）
-
-    QVector<QPoint> snake;
     enum class Direction {
         Up,
         Down,
         Left,
         Right
     };
-    Direction snakeDirection;
-    QPoint food;
-    QTimer* gameTimer;
-    int score;
-    QDateTime startTime;
 
+    enum class GameMode {
+        Mode1,
+        Mode2
+    };
+
+    QVector<QPoint> snake;
+    Direction snakeDirection;
+    QTimer *gameTimer;
+    QPoint food;
+    int score;
+    GameMode currentMode;
+    QDateTime startTime;
+    AStar astar;
+    QVector<QPoint> AStarPath; // 存储A*算法找到的路径
+
+    void updateGame();
     void generateFood();
     bool isGameOver(const QPoint& head);
+    void startMode1();
+    void startMode2();
 };
 
 #endif // SNAKEGAME_H
