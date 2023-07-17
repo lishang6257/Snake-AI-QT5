@@ -9,12 +9,16 @@ CONFIG += c++17
 #DEFINES += QT_DISABLE_DEPRECATED_BEFORE=0x060000    # disables all the APIs deprecated before Qt 6.0.0
 
 SOURCES += \
+    aievaluationwindows.cpp \
+    aievaluator.cpp \
     astar.cpp \
     bfs.cpp \
     main.cpp \
     snakegame.cpp
 
 HEADERS += \
+    aievaluationwindows.h \
+    aievaluator.h \
     astar.h \
     bfs.h \
     snakegame.h

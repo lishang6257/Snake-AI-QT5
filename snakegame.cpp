@@ -4,7 +4,7 @@
 #include <QRandomGenerator>
 #include <QMessageBox>
 
-const int UNIT_SIZE = 20;
+const int UNIT_SIZE = 10;
 extern const int UNIT_COUNT_X = 30;
 extern const int UNIT_COUNT_Y = 20;
 const int WIDTH = UNIT_SIZE * UNIT_COUNT_X;
@@ -16,7 +16,8 @@ SnakeGame::SnakeGame(QWidget *parent)
     gameTimer(new QTimer(this)),
     score(0),
     currentMode(GameMode::Mode1),
-    startTime(QDateTime::currentDateTime())
+    startTime(QDateTime::currentDateTime()),
+    isGameStarted(false)
 {
     resize(WIDTH, HEIGHT);
     setWindowTitle("Snake Game");
@@ -25,7 +26,7 @@ SnakeGame::SnakeGame(QWidget *parent)
 
     gameTimer->setInterval(200); // ÓÎÏ·ËÙ¶È
     connect(gameTimer, &QTimer::timeout, this, &SnakeGame::updateGame);
-    gameTimer->start();
+
 }
 
 void SnakeGame::paintEvent(QPaintEvent *event)
@@ -124,6 +125,8 @@ void SnakeGame::paintEvent(QPaintEvent *event)
     qint64 elapsedSeconds = startTime.secsTo(QDateTime::currentDateTime());
     QString timeText = "Time: " + QString::number(elapsedSeconds) + "s";
     painter.drawText(QRect(10, HEIGHT - 70, 200, 20), timeText);
+
+    emit drawingFinished(this);
 }
 
 void SnakeGame::keyPressEvent(QKeyEvent *event)
@@ -247,22 +250,22 @@ void SnakeGame::updateGame()
     if (isGameOver(newHead))
     {
         gameTimer->stop();
-        QMessageBox::information(this, "Game Over", "Game Over!");
+        isGameStarted = false;
+//        QMessageBox::information(this, "Game Over", "Game Over!");
         return;
     }
 
     if (newHead == food)
     {
+        snake.prepend(newHead);
         generateFood();
         score += 10;
     }
     else
     {
         snake.removeLast();
+        snake.prepend(newHead);
     }
-
-    snake.prepend(newHead);
-
 
     update();
 }
@@ -284,12 +287,15 @@ void SnakeGame::generateFood()
 bool SnakeGame::isGameOver(const QPoint& head)
 {
     if (head.x() < 0 || head.x() >= UNIT_COUNT_X || head.y() < 0 || head.y() >= UNIT_COUNT_Y)
+    {
         return true;
-
+    }
     for (int i = 1; i < snake.size()-1; ++i)
     {
         if (head == snake.at(i))
+        {
             return true;
+        }
     }
 
     return false;
@@ -302,20 +308,19 @@ void SnakeGame::startMode(GameMode gm, int gameTimeInterval)
     snake.append(QPoint(UNIT_COUNT_X / 2, UNIT_COUNT_Y / 2));
     score = 0;
     generateFood();
+    isGameStarted = true;
     gameTimer->start();
     gameTimer->setInterval(gameTimeInterval);
     startTime = QDateTime::currentDateTime();
-    update();
+
 }
 
-int SnakeGame::evaluateAutoAI(GameMode gm, int times,int gameTimeInterval)
+int SnakeGame::evaluateAutoAI()
 {
-    int totalScore = 0;
-    if(gm == GameMode::Mode1) return 0;
-    for(int i = 0;i < times;i ++){
-        startMode(gm, gameTimeInterval);
-        totalScore += score;
-    }
-    return totalScore/times;
+    return score;
+}
 
+bool SnakeGame::isGameOver()
+{
+    return !isGameStarted;
 }
