@@ -1,4 +1,6 @@
-﻿#ifndef ASTAR_H
+﻿// -*- coding: utf-8 -*-
+
+#ifndef ASTAR_H
 #define ASTAR_H
 
 

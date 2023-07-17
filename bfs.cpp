@@ -1,4 +1,6 @@
-﻿#include "bfs.h"
+﻿// -*- coding: utf-8 -*-
+
+#include "bfs.h"
 #include "utils.h"
 
 QVector<QPoint> BFS::findPath(const QPoint &start, const QPoint &end, const QVector<QPoint> &obstacles)
@@ -22,14 +24,7 @@ QVector<QPoint> BFS::findPath(const QPoint &start, const QPoint &end, const QVec
         }
 
         // 遍历相邻的点（水平和竖直方向）
-        QPoint directions[] = {
-            QPoint(1, 0),   // 右
-            QPoint(-1, 0),  // 左
-            QPoint(0, 1),   // 下
-            QPoint(0, -1)   // 上
-        };
-
-        for (const QPoint& direction : directions) {
+        for (const QPoint& direction : DirectionState) {
             QPoint neighbor(current + direction);
 
             if (!visited.contains(neighbor) && isPointValid(neighbor, obstacles)) {

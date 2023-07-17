@@ -1,34 +1,36 @@
-//#ifndef MAINWINDOW_H
-//#define MAINWINDOW_H
+// -*- coding: utf-8 -*-
 
-//#include <QMainWindow>
-//#include <QGridLayout>
-//#include "aievaluator.h"
+#ifndef MAINWINDOW_H
+#define MAINWINDOW_H
 
-
-
-//class AIEvaluationWindows : public QWidget
-//{
-//    Q_OBJECT
-
-//public:
-//    explicit AIEvaluationWindows(QWidget *parent = nullptr);
-//    int AvgScore;
-
-//private slots:
-//    void updateEvaluationStatus(int score);
-
-//signals:
-//    void evaluateFinished();
+#include <QMainWindow>
+#include <QGridLayout>
+#include "aievaluator.h"
 
 
-//private:
-//    void onSubAISnakeGameDrawingFinished(QWidget* subQwidget, int id);
-//    QVector<AIEvaluator*> aiEvaluators;
-//    QGridLayout *gridLayout;
-//    int currentTotalScore;
-//    int currentCalTime;
 
-//};
+class AIEvaluationWindows : public QWidget
+{
+    Q_OBJECT
 
-//#endif // MAINWINDOW_H
+public:
+    explicit AIEvaluationWindows(QWidget *parent = nullptr);
+    int AvgScore;
+
+private slots:
+    void updateEvaluationStatus(int score);
+
+signals:
+    void evaluateFinished();
+
+
+private:
+    void onSubAISnakeGameDrawingFinished(QWidget* subQwidget, int id);
+    QVector<AIEvaluator*> aiEvaluators;
+    QGridLayout *gridLayout;
+    int currentTotalScore;
+    int currentCalTime;
+
+};
+
+#endif // MAINWINDOW_H

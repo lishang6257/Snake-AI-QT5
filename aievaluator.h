@@ -1,28 +1,31 @@
-//#ifndef AIEVALUATOR_H
-//#define AIEVALUATOR_H
+// -*- coding: utf-8 -*-
 
-//#include <QThread>
-//#include "snakegame.h"
+#ifndef AIEVALUATOR_H
+#define AIEVALUATOR_H
 
-//class AIEvaluator : public QThread
-//{
-//    Q_OBJECT
+#include <QThread>
+#include "snakegame.h"
 
-//public:
-//    explicit AIEvaluator(QObject *parent = nullptr);
+class AIEvaluator : public QThread
+{
+    Q_OBJECT
 
-//signals:
-//    void evaluationFinished(int score);
+public:
+    explicit AIEvaluator(QObject *parent = nullptr);
 
-//protected:
-//    void run() override;
+signals:
+    void evaluationFinished(int score);
 
-//private:
-//    GameMode currentGameMode;
-//    int excuateTimes;
-//public:
-//    SnakeGame *snakeGames;
+protected:
+    void run() override;
 
-//};
 
-//#endif // AIEVALUATOR_H
+private:
+    GameMode currentGameMode;
+    int excuateTimes;
+
+public:
+    QVector<SnakeGame *>snakeGames;
+};
+
+#endif // AIEVALUATOR_H

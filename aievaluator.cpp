@@ -1,25 +1,29 @@
-﻿//#include "aievaluator.h"
+﻿// -*- coding: utf-8 -*-
 
-//AIEvaluator::AIEvaluator(QObject *parent)
-//    : QThread(parent),
-//    currentGameMode(SnakeGame::GameMode::Mode2),
-//    excuateTimes(1)
-//{
-//    snakeGames = new SnakeGame();
-//    snakeGames->startMode(SnakeGame::GameMode::Mode2, 10);
+#include "aievaluator.h"
+#include "utils.h"
 
-//}
+AIEvaluator::AIEvaluator(QObject *parent)
+    : QThread(parent),
+    currentGameMode(GameMode::Mode2),
+    excuateTimes(1)
+{
+    for(int i=0;i < excuateTimes;i ++){
+        snakeGames.append(new SnakeGame());
+        snakeGames[i]->startMode(currentGameMode);
+    }
 
-//void AIEvaluator::run()
-//{
 
-//    while(true){
-////        qDebug() << "running " << QThread::currentThreadId();
-//        // 发送评估结果信号
-//        if(snakeGames->isGameOver())
-//        {
-//            emit evaluationFinished(snakeGames->evaluateAutoAI());
-//            return;
-//        }
-//    }
-//}
+}
+
+void AIEvaluator::run()
+{
+    int score = 0;
+    for(int i = 0;i < excuateTimes;i ++){
+        while(snakeGames[i]->isGameStarted){
+            snakeGames[i]->updateGame();
+        }
+        score += snakeGames[i]->score;
+    }
+    emit evaluationFinished(score/excuateTimes);
+}

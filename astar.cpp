@@ -1,4 +1,6 @@
-﻿#include "astar.h"
+﻿// -*- coding: utf-8 -*-
+
+#include "astar.h"
 #include <QHash>
 #include <cmath>
 
@@ -47,12 +49,9 @@ QVector<QPoint> AStar::findPath(const QPoint& start, const QPoint& goal, const Q
         openList.removeOne(currentPoint);
         closedList.append(currentPoint);
 
-        const int dx[4] = {1, -1, 0, 0};
-        const int dy[4] = {0, 0, 1, -1};
-
         for (int i = 0; i < 4; ++i) {
-            int newX = currentPoint.x() + dx[i];
-            int newY = currentPoint.y() + dy[i];
+            int newX = currentPoint.x() + DirectionState[i].x();
+            int newY = currentPoint.y() + DirectionState[i].y();
             QPoint neighbor(newX, newY);
 
             if (!isPointValid(neighbor, obstacles) || closedList.contains(neighbor))

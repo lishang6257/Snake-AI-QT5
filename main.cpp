@@ -1,3 +1,5 @@
+// -*- coding: utf-8 -*-
+
 #include "snakegamewindows.h"
 #include "aievaluationwindows.h"
 

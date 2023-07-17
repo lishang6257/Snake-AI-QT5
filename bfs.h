@@ -1,4 +1,6 @@
-﻿#ifndef BFS_H
+﻿// -*- coding: utf-8 -*-
+
+#ifndef BFS_H
 #define BFS_H
 
 #include <QPoint>

@@ -1,3 +1,5 @@
+// -*- coding: utf-8 -*-
+
 #ifndef SNAKEGAMEWINDOWS_H
 #define SNAKEGAMEWINDOWS_H
 
@@ -20,6 +22,9 @@ class SnakeGameWindows : public QMainWindow
 
 public:
     explicit SnakeGameWindows(QWidget *parent = nullptr);
+    QVector<SnakeState> getReplaySnakeGameState(QString filename);
+    void playSnakeGameState(const SnakeState &snakeState);
+    void playCurrentStepSnakeGameState();
 
 protected:
     void paintEvent(QPaintEvent *event) override;
@@ -38,6 +43,9 @@ private:
     bool isGameStarted;
 
     SnakeGame snakeGame;
+
+    QVector<SnakeState> replaySnakeGameState;
+    int replayStep;
 
     void startSnakeGameMode(GameMode gm,int gameTimeInterval = 10);
     void updateSnakeGame();

@@ -1,46 +1,49 @@
-//#include "aievaluationwindows.h"
-//#include "aievaluator.h"
-//#include <QPushButton>
+// -*- coding: utf-8 -*-
 
-//const int numRows = 1;
-//const int numCols =10;
+#include "aievaluationwindows.h"
+#include "aievaluator.h"
+#include <QPushButton>
 
-//AIEvaluationWindows::AIEvaluationWindows(QWidget *parent)
-//    : QWidget(parent),
-//    currentTotalScore(0),
-//    currentCalTime(0),
-//    AvgScore(0)
-//{
-//    gridLayout = new QGridLayout(this);
-//    gridLayout->setSpacing(10); // 设置布局间距
+const int numRows = 4;
+const int numCols =10;
 
-//    for (int row = 0; row < numRows; ++row) {
-//        for (int col = 0; col < numCols; ++col) {
-//            AIEvaluator *aiEvaluator = new AIEvaluator();
-//            aiEvaluators.append(aiEvaluator);
-//            gridLayout->addWidget(aiEvaluator->snakeGames, row, col);
-//            connect(aiEvaluator, &AIEvaluator::evaluationFinished, this, &AIEvaluationWindows::updateEvaluationStatus);
+AIEvaluationWindows::AIEvaluationWindows(QWidget *parent)
+    : QWidget(parent),
+    AvgScore(0),
+    currentTotalScore(0),
+    currentCalTime(0)
+{
+    gridLayout = new QGridLayout(this);
+    gridLayout->setSpacing(10); // 设置布局间距
+
+    for (int row = 0; row < numRows; ++row) {
+        for (int col = 0; col < numCols; ++col) {
+            AIEvaluator *aiEvaluator = new AIEvaluator();
+            aiEvaluators.append(aiEvaluator);
+            connect(aiEvaluator, &AIEvaluator::evaluationFinished, this, &AIEvaluationWindows::updateEvaluationStatus);
+
+//            gridLayout->addWidget(aiEvaluator->snakeGames[], row, col);
 //            aiEvaluator->snakeGames->setVisible(false);
-//            aiEvaluator->start();
-//        }
-//    }
+            aiEvaluator->start();
+        }
+    }
 
-//    resize(aiEvaluators[0]->snakeGames->width()*numCols+15*numCols, aiEvaluators[0]->snakeGames->height()*numRows+15*numRows);
+//    resize(aiEvaluators[0]->snakeGames[0]->width()*numCols+15*numCols, aiEvaluators[0]->snakeGames->height()*numRows+15*numRows);
 
-//    setLayout(gridLayout);
+    setLayout(gridLayout);
 
-//}
+}
 
 
 
-//void AIEvaluationWindows::updateEvaluationStatus(int score)
-//{
-//    qDebug() << QString("scc:") + QString::number(score);
-//    currentTotalScore += score;
-//    currentCalTime ++;
-//    if(currentCalTime == numCols*numRows) {
-//        qDebug() << QString("avg:") + QString::number(currentTotalScore/currentCalTime);
-//        AvgScore = currentTotalScore/currentCalTime;
-//        emit evaluateFinished();
-//    }
-//}
+void AIEvaluationWindows::updateEvaluationStatus(int score)
+{
+    qDebug() << QString("scc:") + QString::number(score);
+    currentTotalScore += score;
+    currentCalTime ++;
+    if(currentCalTime == numCols*numRows) {
+        qDebug() << QString("avg:") + QString::number(currentTotalScore/currentCalTime);
+        AvgScore = currentTotalScore/currentCalTime;
+        emit evaluateFinished();
+    }
+}

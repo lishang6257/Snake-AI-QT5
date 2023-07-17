@@ -1,9 +1,12 @@
+// -*- coding: utf-8 -*-
+
 #include "snakegamewindows.h"
 #include <QPainter>
 #include <QKeyEvent>
 #include <QRandomGenerator>
 #include <QMessageBox>
-
+#include <QFile>
+#include <QThread>
 
 const int WIDTH = SnakeGameSetting::UNIT_SIZE * SnakeGameSetting::UNIT_COUNT_X;
 const int HEIGHT = SnakeGameSetting::UNIT_SIZE * SnakeGameSetting::UNIT_COUNT_Y;
@@ -16,19 +19,22 @@ SnakeGameWindows::SnakeGameWindows(QWidget *parent)
     currentMode(GameMode::Mode1),
     startTime(QDateTime::currentDateTime()),
     gameDuringTime(0),
-    isGameStarted(false)
+    isGameStarted(false),
+    replayStep(0)
 {
     resize(WIDTH, HEIGHT);
     setWindowTitle("Snake Game");
 
     connect(gameTimer, &QTimer::timeout, this, &SnakeGameWindows::updateSnakeGame);
-//    connect(snakeGame, SIGNAL(snakeGame.gameOver()),this, [](int value) {
-//        gameDuringTime =
-//    });
 
-    startSnakeGameMode(currentMode, 200);
+    replaySnakeGameState = getReplaySnakeGameState("SnakeGame_20230717_143654.dat");
 
+    disconnect(gameTimer, &QTimer::timeout, this, &SnakeGameWindows::updateSnakeGame);
+    connect(gameTimer, &QTimer::timeout, this, &SnakeGameWindows::playCurrentStepSnakeGameState);
+
+    gameTimer->start(10);
 }
+
 
 void SnakeGameWindows::startSnakeGameMode(GameMode gm, int timeInterval)
 {
@@ -113,12 +119,13 @@ void SnakeGameWindows::paintEvent(QPaintEvent *event)
             painter.drawRect(point.x() * UNIT_SIZE, point.y() * UNIT_SIZE, UNIT_SIZE, UNIT_SIZE);
         }
     }
-
-    painter.setPen(Qt::NoPen);
-    painter.setBrush(Qt::darkGreen);
-    QPoint head = snakeGame.snake.first();
-    painter.drawEllipse(head.x() * UNIT_SIZE, head.y() * UNIT_SIZE, UNIT_SIZE, UNIT_SIZE);
-
+    if(!snakeGame.snake.empty())
+    {
+        painter.setPen(Qt::NoPen);
+        painter.setBrush(Qt::darkGreen);
+        QPoint head = snakeGame.snake.first();
+        painter.drawEllipse(head.x() * UNIT_SIZE, head.y() * UNIT_SIZE, UNIT_SIZE, UNIT_SIZE);
+    }
     painter.setBrush(Qt::red);
     QPointF foodPoints[3] = {
         QPointF(snakeGame.food.x() * UNIT_SIZE + UNIT_SIZE / 2, snakeGame.food.y() * UNIT_SIZE),
@@ -150,20 +157,20 @@ void SnakeGameWindows::keyPressEvent(QKeyEvent *event)
     switch (event->key())
     {
     case Qt::Key_W:
-        if (snakeGame.snakeDirection != SnakeGame::Direction::Down)
-            snakeGame.snakeDirection = SnakeGame::Direction::Up;
+        if (snakeGame.snakeDirection != Direction::Down)
+            snakeGame.snakeDirection = Direction::Up;
         break;
     case Qt::Key_S:
-        if (snakeGame.snakeDirection != SnakeGame::Direction::Up)
-            snakeGame.snakeDirection = SnakeGame::Direction::Down;
+        if (snakeGame.snakeDirection != Direction::Up)
+            snakeGame.snakeDirection = Direction::Down;
         break;
     case Qt::Key_A:
-        if (snakeGame.snakeDirection != SnakeGame::Direction::Right)
-            snakeGame.snakeDirection = SnakeGame::Direction::Left;
+        if (snakeGame.snakeDirection != Direction::Right)
+            snakeGame.snakeDirection = Direction::Left;
         break;
     case Qt::Key_D:
-        if (snakeGame.snakeDirection != SnakeGame::Direction::Left)
-            snakeGame.snakeDirection = SnakeGame::Direction::Right;
+        if (snakeGame.snakeDirection != Direction::Left)
+            snakeGame.snakeDirection = Direction::Right;
         break;
     }
 }
@@ -187,4 +194,43 @@ void SnakeGameWindows::mousePressEvent(QMouseEvent *event)
         }
     }
 }
+
+void SnakeGameWindows::playSnakeGameState(const SnakeState &snakeState)
+{
+    currentMode = snakeState.currentGameMode;
+    isGameStarted = snakeState.isGameStarted;
+    currentMode = snakeState.currentGameMode;
+    snakeGame.snake = snakeState.snake;
+    snakeGame.food = snakeState.food;
+    snakeGame.snakeDirection = snakeState.currentDirection;
+
+    update();
+}
+
+void SnakeGameWindows::playCurrentStepSnakeGameState()
+{
+    if(replayStep >= replaySnakeGameState.size()) replayStep--;
+
+    playSnakeGameState(replaySnakeGameState[replayStep]);
+    replayStep ++;
+
+    update();
+}
+
+
+QVector<SnakeState> SnakeGameWindows::getReplaySnakeGameState(QString filename)
+{
+    // 从文件中读取 QVector<SnakeState> 对象
+    QFile file(filename);
+    QVector<SnakeState> states;
+    if (file.open(QIODevice::ReadOnly))
+    {
+        QByteArray data = file.readAll();
+        states = SnakeState::deserializeQVector(data);
+        file.close();
+    }
+    return states;
+}
+
+
 
