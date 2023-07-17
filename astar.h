@@ -1,4 +1,4 @@
-﻿// -*- coding: utf-8 -*-
+// -*- coding: utf-8 -*-
 
 #ifndef ASTAR_H
 #define ASTAR_H
@@ -6,6 +6,7 @@
 
 #include <QVector>
 #include <QPoint>
+
 
 class AStar
 {

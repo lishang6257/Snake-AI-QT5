@@ -11,7 +11,7 @@ class AIEvaluator : public QThread
     Q_OBJECT
 
 public:
-    explicit AIEvaluator(QObject *parent = nullptr);
+    explicit AIEvaluator(QObject *parent = nullptr,QString qtableFilename = "");
 
 signals:
     void evaluationFinished(int score);
@@ -23,6 +23,7 @@ protected:
 private:
     GameMode currentGameMode;
     int excuateTimes;
+    QString qTableFilename;
 
 public:
     QVector<SnakeGame *>snakeGames;

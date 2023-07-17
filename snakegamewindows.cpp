@@ -157,20 +157,20 @@ void SnakeGameWindows::keyPressEvent(QKeyEvent *event)
     switch (event->key())
     {
     case Qt::Key_W:
-        if (snakeGame.snakeDirection != Direction::Down)
-            snakeGame.snakeDirection = Direction::Up;
+        if (snakeGame.snakeDirection != SnakeDirection::Down)
+            snakeGame.snakeDirection = SnakeDirection::Up;
         break;
     case Qt::Key_S:
-        if (snakeGame.snakeDirection != Direction::Up)
-            snakeGame.snakeDirection = Direction::Down;
+        if (snakeGame.snakeDirection != SnakeDirection::Up)
+            snakeGame.snakeDirection = SnakeDirection::Down;
         break;
     case Qt::Key_A:
-        if (snakeGame.snakeDirection != Direction::Right)
-            snakeGame.snakeDirection = Direction::Left;
+        if (snakeGame.snakeDirection != SnakeDirection::Right)
+            snakeGame.snakeDirection = SnakeDirection::Left;
         break;
     case Qt::Key_D:
-        if (snakeGame.snakeDirection != Direction::Left)
-            snakeGame.snakeDirection = Direction::Right;
+        if (snakeGame.snakeDirection != SnakeDirection::Left)
+            snakeGame.snakeDirection = SnakeDirection::Right;
         break;
     }
 }

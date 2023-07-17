@@ -11,13 +11,15 @@
 #include <QMouseEvent>
 #include <QDateTime>
 
+#include "utils.h"
 #include "astar.h"
 #include "bfs.h"
-#include "utils.h"
 
 class SnakeGameWindows;
 class AIEvaluator;
 class SnakeState;
+class QLearning;
+
 
 class SnakeGame : public QObject
 {
@@ -28,41 +30,53 @@ class SnakeGame : public QObject
     friend class SnakeState;
 
 public:
-    explicit SnakeGame();
+    explicit SnakeGame(QString qTableFilename = "", bool autoSave = false);
 
     void startMode(GameMode gm);
-    int evaluateAutoAI();
+
+    SnakeState getCurrentSnakeState() const;
+
     bool isGameOver();
-    SnakeState getCurrentSnakeState();
+    void resetCurrentMode();
+    double executeQLearingAction(int action);
 
 private:
 
     QVector<QPoint> snake;
-    Direction snakeDirection;
+    SnakeDirection snakeDirection;
     QPoint food;
     int score;
     GameMode currentMode;
     int step;
+
+    QString replayFilename;
+    QString qTableFilename;
 
     bool isGameStarted;
     bool autoSave;
     QString autoSaveFilename;
 
 
-    AStar astar;
+    AStar *astar;
     QVector<QPoint> AStarPath; // 存储A*算法找到的路径
 
-    BFS bfs;
+    BFS *bfs;
     QVector<QPoint> BFSPath; // 存储A*算法找到的路径
+
+    QLearning *qlearning;
+    QLearingTable qTable;
 
     void updateGame();
     void generateFood();
     void BFSFindFood();
     void AStarFindFood();
+    void QLearningFindFood();
     void AutoChangeSnakeDirection(const QVector<QPoint>& path);
-    bool isGameOver(const QPoint& head);
 
     void saveSnakeToFile(const SnakeState ss, const QString filename);
+
+    int evaluateAutoAI();
+    bool isGameOver(const QPoint& head) const;
 
 };
 

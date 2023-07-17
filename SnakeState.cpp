@@ -2,7 +2,9 @@
 
 #include <QIODevice>
 #include <QDataStream>
+#include <QHash>
 #include "utils.h"
+
 SnakeState::SnakeState()
     : QObject(), // 必须调用父类的拷贝构造函数
     UNIT_COUNT_X(SnakeGameSetting::UNIT_COUNT_X),
@@ -10,7 +12,7 @@ SnakeState::SnakeState()
     step(0),
     isGameStarted(false),
     currentGameMode(GameMode::Mode1),
-    currentDirection(Direction::Right)
+    currentDirection(SnakeDirection::Right)
 {}
 
 
@@ -112,7 +114,7 @@ SnakeState SnakeState::deserialize(const QByteArray &data)
     stream >> state.food;
     stream >> direction;
 
-    state.currentDirection = static_cast<Direction>(direction);
+    state.currentDirection = static_cast<SnakeDirection>(direction);
     state.currentGameMode = static_cast<GameMode>(gameMode);
 
     return state;
@@ -141,10 +143,10 @@ QVector<SnakeState> SnakeState::deserializeQVector(const QByteArray &data)
 
     return states;
 }
-//// 实现哈希函数
-//uint AIState::qHash() const
+
+//inline uint qHash(const SnakeState &state)
 //{
 //    // 以头部位置和食物位置的哈希值为基础，再加上蛇身长度作为哈希值
-//    return qHash(headPosition) ^ qHash(foodPosition) ^ snakeLength;
+//    return qHash(state.snake.first()) ^ qHash(state.food) ^ state.snake.size() ^ state.step;
 //}
 

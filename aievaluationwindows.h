@@ -5,6 +5,7 @@
 
 #include <QMainWindow>
 #include <QGridLayout>
+#include <QObject>
 #include "aievaluator.h"
 
 
@@ -14,7 +15,7 @@ class AIEvaluationWindows : public QWidget
     Q_OBJECT
 
 public:
-    explicit AIEvaluationWindows(QWidget *parent = nullptr);
+    explicit AIEvaluationWindows(QWidget *parent = nullptr, QString qtableFilename = "");
     int AvgScore;
 
 private slots:
@@ -30,6 +31,8 @@ private:
     QGridLayout *gridLayout;
     int currentTotalScore;
     int currentCalTime;
+
+    QString qTableFilename;
 
 };
 

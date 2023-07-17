@@ -1,15 +1,16 @@
-﻿// -*- coding: utf-8 -*-
+// -*- coding: utf-8 -*-
 
 #include "aievaluator.h"
 #include "utils.h"
 
-AIEvaluator::AIEvaluator(QObject *parent)
+AIEvaluator::AIEvaluator(QObject *parent,QString qtableFilename)
     : QThread(parent),
     currentGameMode(GameMode::Mode2),
-    excuateTimes(1)
+    excuateTimes(1),
+    qTableFilename(qtableFilename)
 {
     for(int i=0;i < excuateTimes;i ++){
-        snakeGames.append(new SnakeGame());
+        snakeGames.append(new SnakeGame(qTableFilename = qtableFilename));
         snakeGames[i]->startMode(currentGameMode);
     }
 

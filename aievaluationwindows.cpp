@@ -5,20 +5,21 @@
 #include <QPushButton>
 
 const int numRows = 4;
-const int numCols =10;
+const int numCols =5;
 
-AIEvaluationWindows::AIEvaluationWindows(QWidget *parent)
+AIEvaluationWindows::AIEvaluationWindows(QWidget *parent, QString qtableFilename)
     : QWidget(parent),
     AvgScore(0),
     currentTotalScore(0),
-    currentCalTime(0)
+    currentCalTime(0),
+    qTableFilename(qtableFilename)
 {
-    gridLayout = new QGridLayout(this);
-    gridLayout->setSpacing(10); // 设置布局间距
+//    gridLayout = new QGridLayout(this);
+//    gridLayout->setSpacing(10); // 设置布局间距
 
     for (int row = 0; row < numRows; ++row) {
         for (int col = 0; col < numCols; ++col) {
-            AIEvaluator *aiEvaluator = new AIEvaluator();
+            AIEvaluator *aiEvaluator = new AIEvaluator(parent = this,qtableFilename = qtableFilename);
             aiEvaluators.append(aiEvaluator);
             connect(aiEvaluator, &AIEvaluator::evaluationFinished, this, &AIEvaluationWindows::updateEvaluationStatus);
 
@@ -30,7 +31,7 @@ AIEvaluationWindows::AIEvaluationWindows(QWidget *parent)
 
 //    resize(aiEvaluators[0]->snakeGames[0]->width()*numCols+15*numCols, aiEvaluators[0]->snakeGames->height()*numRows+15*numRows);
 
-    setLayout(gridLayout);
+//    setLayout(gridLayout);
 
 }
 
