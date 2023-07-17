@@ -1,5 +1,5 @@
 ﻿#include "bfs.h"
-
+#include "utils.h"
 
 QVector<QPoint> BFS::findPath(const QPoint &start, const QPoint &end, const QVector<QPoint> &obstacles)
 {
@@ -59,7 +59,7 @@ QVector<QPoint> BFS::reconstructPath(const QPoint &start, const QPoint &end, con
 
 bool BFS::isPointValid(const QPoint& point, const QVector<QPoint>& obstacles) const
 {
-    if (point.x() < 0 || point.x() >= UNIT_COUNT_X || point.y() < 0 || point.y() >= UNIT_COUNT_Y)
+    if (point.x() < 0 || point.x() >= SnakeGameSetting::UNIT_COUNT_X || point.y() < 0 || point.y() >= SnakeGameSetting::UNIT_COUNT_Y)
         return false;
 
     if (obstacles.contains(point))

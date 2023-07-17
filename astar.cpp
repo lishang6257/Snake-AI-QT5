@@ -2,20 +2,12 @@
 #include <QHash>
 #include <cmath>
 
-extern const int UNIT_COUNT_X;
-extern const int UNIT_COUNT_Y;
+#include "utils.h"
 
 AStar::AStar()
 {
 
 }
-
-//QVector<QPoint> AStar::getPath() const
-//{
-////    if(!path.empty())
-//        return path;
-////    return SearchedButNotFoundLongestPath;
-//}
 
 QVector<QPoint> AStar::findPath(const QPoint& start, const QPoint& goal, const QVector<QPoint>& obstacles)
 {
@@ -107,7 +99,7 @@ int AStar::heuristic(const QPoint& point, const QPoint& goal) const
 
 bool AStar::isPointValid(const QPoint& point, const QVector<QPoint>& obstacles) const
 {
-    if (point.x() < 0 || point.x() >= UNIT_COUNT_X || point.y() < 0 || point.y() >= UNIT_COUNT_Y)
+    if (point.x() < 0 || point.x() >= SnakeGameSetting::UNIT_COUNT_X || point.y() < 0 || point.y() >= SnakeGameSetting::UNIT_COUNT_Y)
         return false;
 
     if (obstacles.contains(point))

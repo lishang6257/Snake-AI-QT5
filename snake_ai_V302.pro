@@ -14,14 +14,17 @@ SOURCES += \
     astar.cpp \
     bfs.cpp \
     main.cpp \
-    snakegame.cpp
+    snakegame.cpp \
+    snakegamewindows.cpp
 
 HEADERS += \
     aievaluationwindows.h \
     aievaluator.h \
     astar.h \
     bfs.h \
-    snakegame.h
+    snakegame.h \
+    snakegamewindows.h \
+    utils.h
 
 FORMS += \
     snakegame.ui

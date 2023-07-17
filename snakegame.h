@@ -11,32 +11,25 @@
 
 #include "astar.h"
 #include "bfs.h"
+#include "utils.h"
 
+class SnakeGameWindows;
 
-class SnakeGame : public QMainWindow
+class SnakeGame : public QObject
 {
     Q_OBJECT
 
+    friend class SnakeGameWindows;
 
 public:
-    explicit SnakeGame(QWidget *parent = nullptr);
+    explicit SnakeGame();
 
-    enum class GameMode {
-        Mode1,
-        Mode2,
-        Mode3
-    };
-    void startMode(GameMode gm,int gameTimeInterval = 10);
+    void startMode(GameMode gm);
     int evaluateAutoAI();
     bool isGameOver();
 
-protected:
-    void paintEvent(QPaintEvent *event) override;
-    void keyPressEvent(QKeyEvent *event) override;
-    void mousePressEvent(QMouseEvent *event) override;
-
 signals:
-    void drawingFinished(QWidget *subEidgt);
+    void gameOver();
 
 private:
     enum class Direction {
@@ -48,13 +41,10 @@ private:
 
 
     QVector<QPoint> snake;
-    QVector<QPoint> boarderObstacles;
     Direction snakeDirection;
-    QTimer *gameTimer;
     QPoint food;
     int score;
     GameMode currentMode;
-    QDateTime startTime;
 
     bool isGameStarted;
 

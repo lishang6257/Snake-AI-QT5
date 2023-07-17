@@ -1,4 +1,4 @@
-#include "snakegame.h"
+#include "snakegamewindows.h"
 #include "aievaluationwindows.h"
 
 #include <QApplication>
@@ -6,15 +6,15 @@
 int main(int argc, char *argv[])
 {
     QApplication a(argc, argv);
-//    SnakeGame w;
-//    w.show();
+    SnakeGameWindows w;
+    w.show();
 
 
-    AIEvaluationWindows AIw;
+//    AIEvaluationWindows AIw;
 //    while(true){
 //        connect(&AIw,AIEvaluationWindows::evaluateFinished(),this,Q);
 //    }
-    AIw.show();
+//    AIw.show();
 
     return a.exec();
 }

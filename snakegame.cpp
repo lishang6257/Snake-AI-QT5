@@ -4,170 +4,14 @@
 #include <QRandomGenerator>
 #include <QMessageBox>
 
-const int UNIT_SIZE = 10;
-extern const int UNIT_COUNT_X = 30;
-extern const int UNIT_COUNT_Y = 20;
-const int WIDTH = UNIT_SIZE * UNIT_COUNT_X;
-const int HEIGHT = UNIT_SIZE * UNIT_COUNT_Y;
 
-SnakeGame::SnakeGame(QWidget *parent)
-    : QMainWindow(parent),
-    snakeDirection(Direction::Right),
-    gameTimer(new QTimer(this)),
+SnakeGame::SnakeGame()
+    :snakeDirection(Direction::Right),
     score(0),
     currentMode(GameMode::Mode1),
-    startTime(QDateTime::currentDateTime()),
     isGameStarted(false)
 {
-    resize(WIDTH, HEIGHT);
-    setWindowTitle("Snake Game");
-
-    snake.append(QPoint(UNIT_COUNT_X / 2, UNIT_COUNT_Y / 2)); // 初始化贪吃蛇位置
-
-    gameTimer->setInterval(200); // 游戏速度
-    connect(gameTimer, &QTimer::timeout, this, &SnakeGame::updateGame);
-
-}
-
-void SnakeGame::paintEvent(QPaintEvent *event)
-{
-    QPainter painter(this);
-    painter.setRenderHint(QPainter::Antialiasing, true);
-    painter.fillRect(rect(), Qt::gray);
-
-    painter.setPen(Qt::NoPen);
-    painter.setPen(Qt::black);
-
-    // 绘制垂直线条
-    for (int x = 0; x <= WIDTH; x += UNIT_SIZE)
-    {
-        painter.drawLine(x, 0, x, HEIGHT);
-    }
-
-    // 绘制水平线条
-    for (int y = 0; y <= HEIGHT; y += UNIT_SIZE)
-    {
-        painter.drawLine(0, y, WIDTH, y);
-    }
-
-    // 绘制贪吃蛇躯体
-    for (int i = 1; i < snake.size(); ++i)
-    {
-        QPoint point = snake.at(i);
-        painter.setPen(Qt::black);
-        painter.setBrush(Qt::green);
-        painter.drawRect(point.x() * UNIT_SIZE, point.y() * UNIT_SIZE, UNIT_SIZE, UNIT_SIZE);
-        QPoint prePoint = snake.at(i - 1);
-        if(prePoint == snake.first()) continue;
-        QPoint dirPoint = point - prePoint;
-        painter.setPen(Qt::white);
-        if(dirPoint.x() == 1){
-            painter.drawLine(QLine(point.x() * UNIT_SIZE,point.y() * UNIT_SIZE,point.x() * UNIT_SIZE,(point.y()+1) * UNIT_SIZE));
-        }
-        else if(dirPoint.x() == -1){
-            painter.drawLine(QLine(prePoint.x() * UNIT_SIZE,prePoint.y() * UNIT_SIZE,prePoint.x() * UNIT_SIZE,(prePoint.y()+1) * UNIT_SIZE));
-        }
-        else if(dirPoint.y() == 1){
-            painter.drawLine(QLine(point.x() * UNIT_SIZE,point.y() * UNIT_SIZE,(point.x()+1) * UNIT_SIZE,point.y() * UNIT_SIZE));
-        }
-        else if(dirPoint.y() == -1){
-            painter.drawLine(QLine(prePoint.x() * UNIT_SIZE,prePoint.y() * UNIT_SIZE,(prePoint.x()+1) * UNIT_SIZE,prePoint.y() * UNIT_SIZE));
-        }
-
-    }
-    if (currentMode == GameMode::Mode1) {
-
-    }
-    else if (currentMode == GameMode::Mode2) {
-        // 绘制A*寻路路径
-        painter.setPen(Qt::red);
-        painter.setBrush(Qt::NoBrush);
-        for (const QPoint& point : AStarPath) {
-            painter.drawRect(point.x() * UNIT_SIZE, point.y() * UNIT_SIZE, UNIT_SIZE, UNIT_SIZE);
-        }
-
-    }
-    else if (currentMode == GameMode::Mode3) {
-        // 绘制BFS寻路路径
-        painter.setPen(Qt::darkYellow);
-        painter.setBrush(Qt::NoBrush);
-        for (const QPoint& point : BFSPath) {
-            painter.drawRect(point.x() * UNIT_SIZE, point.y() * UNIT_SIZE, UNIT_SIZE, UNIT_SIZE);
-        }
-    }
-
-    painter.setPen(Qt::NoPen);
-    painter.setBrush(Qt::darkGreen);
-    QPoint head = snake.first();
-    painter.drawEllipse(head.x() * UNIT_SIZE, head.y() * UNIT_SIZE, UNIT_SIZE, UNIT_SIZE);
-
-    painter.setBrush(Qt::red);
-    QPointF foodPoints[3] = {
-        QPointF(food.x() * UNIT_SIZE + UNIT_SIZE / 2, food.y() * UNIT_SIZE),
-        QPointF(food.x() * UNIT_SIZE, food.y() * UNIT_SIZE + UNIT_SIZE),
-        QPointF(food.x() * UNIT_SIZE + UNIT_SIZE, food.y() * UNIT_SIZE + UNIT_SIZE)
-    };
-    painter.drawPolygon(foodPoints, 3);
-
-    QString modeText;
-    if (currentMode == GameMode::Mode1)
-        modeText = "Mode: 1 (Manual)";
-    else if (currentMode == GameMode::Mode2)
-        modeText = "Mode: 2 (Auto-AStar)";
-    else if (currentMode == GameMode::Mode3)
-        modeText = "Mode: 3 (Auto-BFS)";
-
-    painter.setPen(Qt::white);
-    painter.setFont(QFont("Arial", 14, QFont::Bold));
-    painter.drawText(QRect(10, HEIGHT - 30, 200, 20), modeText);
-    painter.drawText(QRect(10, HEIGHT - 50, 200, 20), "Score: " + QString::number(score));
-
-    qint64 elapsedSeconds = startTime.secsTo(QDateTime::currentDateTime());
-    QString timeText = "Time: " + QString::number(elapsedSeconds) + "s";
-    painter.drawText(QRect(10, HEIGHT - 70, 200, 20), timeText);
-
-    emit drawingFinished(this);
-}
-
-void SnakeGame::keyPressEvent(QKeyEvent *event)
-{
-    switch (event->key())
-    {
-    case Qt::Key_W:
-        if (snakeDirection != Direction::Down)
-            snakeDirection = Direction::Up;
-        break;
-    case Qt::Key_S:
-        if (snakeDirection != Direction::Up)
-            snakeDirection = Direction::Down;
-        break;
-    case Qt::Key_A:
-        if (snakeDirection != Direction::Right)
-            snakeDirection = Direction::Left;
-        break;
-    case Qt::Key_D:
-        if (snakeDirection != Direction::Left)
-            snakeDirection = Direction::Right;
-        break;
-    }
-}
-
-void SnakeGame::mousePressEvent(QMouseEvent *event)
-{
-    if (event->button() == Qt::LeftButton) {
-        QPoint clickPos = event->pos() / UNIT_SIZE;
-        if (clickPos == food) {
-            return;
-        }
-        else {
-            if (currentMode == GameMode::Mode1)
-                startMode(GameMode::Mode2);
-            else if (currentMode == GameMode::Mode2)
-                startMode(GameMode::Mode3);
-            else if (currentMode == GameMode::Mode3)
-                startMode(GameMode::Mode1, 200);
-        }
-    }
+    snake.append(QPoint(SnakeGameSetting::UNIT_COUNT_X / 2, SnakeGameSetting::UNIT_COUNT_Y / 2)); // 初始化贪吃蛇位置
 }
 
 void SnakeGame::BFSFindFood()
@@ -249,9 +93,8 @@ void SnakeGame::updateGame()
 
     if (isGameOver(newHead))
     {
-        gameTimer->stop();
         isGameStarted = false;
-//        QMessageBox::information(this, "Game Over", "Game Over!");
+        emit gameOver();
         return;
     }
 
@@ -267,7 +110,6 @@ void SnakeGame::updateGame()
         snake.prepend(newHead);
     }
 
-    update();
 }
 
 void SnakeGame::generateFood()
@@ -276,8 +118,8 @@ void SnakeGame::generateFood()
     QPoint newFood;
     bool isOccupied = true;
     while (isOccupied) {
-        int x = QRandomGenerator::global()->bounded(UNIT_COUNT_X);
-        int y = QRandomGenerator::global()->bounded(UNIT_COUNT_Y);
+        int x = QRandomGenerator::global()->bounded(SnakeGameSetting::UNIT_COUNT_X);
+        int y = QRandomGenerator::global()->bounded(SnakeGameSetting::UNIT_COUNT_Y);
         newFood = QPoint(x, y);
         isOccupied = occupiedPositions.contains(newFood);
     }
@@ -286,7 +128,7 @@ void SnakeGame::generateFood()
 
 bool SnakeGame::isGameOver(const QPoint& head)
 {
-    if (head.x() < 0 || head.x() >= UNIT_COUNT_X || head.y() < 0 || head.y() >= UNIT_COUNT_Y)
+    if (head.x() < 0 || head.x() >= SnakeGameSetting::UNIT_COUNT_X || head.y() < 0 || head.y() >= SnakeGameSetting::UNIT_COUNT_Y)
     {
         return true;
     }
@@ -301,18 +143,14 @@ bool SnakeGame::isGameOver(const QPoint& head)
     return false;
 }
 
-void SnakeGame::startMode(GameMode gm, int gameTimeInterval)
+void SnakeGame::startMode(GameMode gm)
 {
     currentMode = gm;
     snake.clear();
-    snake.append(QPoint(UNIT_COUNT_X / 2, UNIT_COUNT_Y / 2));
+    snake.append(QPoint(SnakeGameSetting::UNIT_COUNT_X / 2, SnakeGameSetting::UNIT_COUNT_Y / 2));
     score = 0;
     generateFood();
     isGameStarted = true;
-    gameTimer->start();
-    gameTimer->setInterval(gameTimeInterval);
-    startTime = QDateTime::currentDateTime();
-
 }
 
 int SnakeGame::evaluateAutoAI()

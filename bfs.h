@@ -6,9 +6,6 @@
 #include <QSet>
 
 
-extern const int UNIT_COUNT_X;
-extern const int UNIT_COUNT_Y;
-
 class BFS
 {
 public:
