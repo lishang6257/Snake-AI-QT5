@@ -50,8 +50,41 @@ SnakeState& SnakeState::operator=(const SnakeState &other)
 
     return *this;
 }
+bool SnakeState::operator==(const SnakeState &other) const
+{
+    // 在这里添加比较两个对象的成员变量是否相等的逻辑
+    // 注意：这里的比较逻辑应该涵盖所有需要比较的成员变量
+
+    return UNIT_COUNT_X == other.UNIT_COUNT_X &&
+           UNIT_COUNT_Y == other.UNIT_COUNT_Y &&
+           step == other.step &&
+           isGameStarted == other.isGameStarted &&
+           currentGameMode == other.currentGameMode &&
+           snake == other.snake &&
+           food == other.food &&
+           currentDirection == other.currentDirection;
+}
 
 QByteArray SnakeState::serialize() const
+{
+    QByteArray data;
+    QDataStream stream(&data, QIODevice::WriteOnly);
+    stream.setVersion(QDataStream::Qt_5_15); // 设置数据流的版本，确保兼容性
+
+    // 将成员变量逐个写入数据流
+    stream << UNIT_COUNT_X;
+    stream << UNIT_COUNT_Y;
+    stream << isGameStarted;
+    stream << static_cast<int>(currentGameMode);
+    stream << step;
+    stream << snake;
+    stream << food;
+    stream << static_cast<int>(currentDirection);
+
+    return data;
+}
+
+QByteArray SnakeState::serializeAppend() const
 {
     QByteArray data;
     QDataStream stream(&data, QIODevice::WriteOnly);
@@ -75,6 +108,7 @@ QByteArray SnakeState::serialize() const
 
     return data2+data;
 }
+
 
 QByteArray SnakeState::serialize(const QVector<SnakeState> &states) const
 {
@@ -144,9 +178,42 @@ QVector<SnakeState> SnakeState::deserializeQVector(const QByteArray &data)
     return states;
 }
 
-//inline uint qHash(const SnakeState &state)
-//{
-//    // 以头部位置和食物位置的哈希值为基础，再加上蛇身长度作为哈希值
-//    return qHash(state.snake.first()) ^ qHash(state.food) ^ state.snake.size() ^ state.step;
-//}
+// 将 QLearningTable 写入 QDataStream
+QDataStream &operator<<(QDataStream &out, const QLearningTable &table)
+{
+    out.setVersion(QDataStream::Qt_5_15); // 设置数据流的版本，确保兼容性
+    for (const auto &key : table.keys())
+    {
+        QByteArray stateData = key.serialize();
+        out << static_cast<qint32>(stateData.size());
+
+        // 再写入 SnakeState 对象的序列化数据
+        out.writeRawData(stateData.data(), stateData.size());
+        out << table.value(key);
+    }
+    return out;
+}
+
+// 从 QDataStream 读取数据到 QLearningTable
+QDataStream &operator>>(QDataStream &in, QLearningTable &table)
+{
+    table.clear();
+    in.setVersion(QDataStream::Qt_5_15); // 设置数据流的版本，确保兼容性
+    while(!in.atEnd()){
+        SnakeState key;
+        QHash<int, double> value;
+
+        qint32 stateDataSize;
+        in >> stateDataSize;
+
+        // 读取 SnakeState 对象的序列化数据，并反序列化为 SnakeState 对象
+        QByteArray stateData(stateDataSize, Qt::Uninitialized);
+        in.readRawData(stateData.data(), stateDataSize);
+        key = SnakeState::deserialize(stateData);
+
+        in >> value;
+        table.insert(key, value);
+    }
+    return in;
+}
 

@@ -16,14 +16,14 @@ class QLearning : public QObject
 
 private:
     // 初始化 Q 表
-    QLearingTable qTable;
+    QLearningTable qTable;
 
 public:
     explicit QLearning(QObject *parent = nullptr);
 
 
     void saveQTableToFile(const QString& filename) const;
-    QLearingTable loadQTableFromFile(const QString& filename);
+    QLearningTable loadQTableFromFile(const QString& filename);
 
     // Q 学习函数
     void train(SnakeGame& game, int numEpisodes, double learningRate, double discountFactor, double explorationProb);

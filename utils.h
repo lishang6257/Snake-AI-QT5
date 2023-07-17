@@ -41,29 +41,16 @@ public:
 class SnakeState;
 
 // 定义 Q 表的类型，用于保存状态和动作对应的 Q 值
-typedef QHash<SnakeState, QHash<int, double>> QLearingTable;
-
+typedef QHash<SnakeState, QHash<int, double>> QLearningTable;
+QDataStream &operator<<(QDataStream &out, const QLearningTable &table);
+QDataStream &operator>>(QDataStream &in, QLearningTable &table);
 class SnakeState : QObject
 {
 public:
     SnakeState();
     SnakeState(const SnakeState &other); // 自定义拷贝构造函数
     SnakeState& operator=(const SnakeState &other);
-    bool operator==(const SnakeState &other) const
-    {
-        // 在这里添加比较两个对象的成员变量是否相等的逻辑
-        // 注意：这里的比较逻辑应该涵盖所有需要比较的成员变量
-
-        return UNIT_COUNT_X == other.UNIT_COUNT_X &&
-               UNIT_COUNT_Y == other.UNIT_COUNT_Y &&
-               step == other.step &&
-               isGameStarted == other.isGameStarted &&
-               currentGameMode == other.currentGameMode &&
-               snake == other.snake &&
-               food == other.food &&
-               currentDirection == other.currentDirection;
-    }
-
+    bool operator==(const SnakeState &other) const;
 
 //    SnakeGameSetting snakeGameSetting;
     int UNIT_COUNT_X;
@@ -76,11 +63,12 @@ public:
     SnakeDirection currentDirection;
 
     friend uint qHash(const SnakeState &state) {
-        return qHash(state.snake.first()) ^ qHash(state.food) ^ state.step;
+        return qHash(state.snake.first()) ^ qHash(state.food);
     }
 
     // 将对象序列化为二进制数据
     QByteArray serialize() const;
+    QByteArray serializeAppend() const;
     // 从二进制数据中反序列化对象
     static SnakeState deserialize(const QByteArray &data);
 

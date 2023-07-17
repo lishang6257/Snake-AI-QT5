@@ -8,14 +8,27 @@
 #include <QMessageBox>
 #include <QFile>
 
-SnakeGame::SnakeGame(QString qTableFilename, bool autoSave)
+SnakeGame::SnakeGame()
+    :snakeDirection(SnakeDirection::Right),
+    score(0),
+    currentMode(GameMode::Mode1),
+    step(0),
+    isGameStarted(false),
+    autoSave(false),
+    qlearning(new QLearning())
+{
+    snake.append(QPoint(SnakeGameSetting::UNIT_COUNT_X / 2, SnakeGameSetting::UNIT_COUNT_Y / 2));
+}
+
+SnakeGame::SnakeGame(QString qTableFilename)
     :snakeDirection(SnakeDirection::Right),
     score(0),
     currentMode(GameMode::Mode1),
     step(0),
     qTableFilename(qTableFilename),
     isGameStarted(false),
-    autoSave(autoSave)
+    autoSave(false),
+    qlearning(new QLearning())
 {
     snake.append(QPoint(SnakeGameSetting::UNIT_COUNT_X / 2, SnakeGameSetting::UNIT_COUNT_Y / 2));
 }
@@ -27,10 +40,10 @@ void SnakeGame::BFSFindFood()
     QVector<QPoint> obstacles = snake.toVector();
     if(!obstacles.empty()) obstacles.removeFirst();
     if(!obstacles.empty()) obstacles.removeLast();
-    BFSPath = bfs->findPath(head, food, obstacles);
+    BFSPath = bfs.findPath(head, food, obstacles);
 
     if (BFSPath.isEmpty()){
-        BFSPath = bfs->findPath(head, snake.last(), obstacles);
+        BFSPath = bfs.findPath(head, snake.last(), obstacles);
     }
 }
 
@@ -39,10 +52,10 @@ void SnakeGame::AStarFindFood()
     QVector<QPoint> obstacles = snake.toVector();
     if(!obstacles.empty()) obstacles.removeFirst();
     if(!obstacles.empty()) obstacles.removeLast();
-    AStarPath = astar->findPath(snake.first(), food, obstacles);
+    AStarPath = astar.findPath(snake.first(), food, obstacles);
 
     if (AStarPath.isEmpty()){
-        AStarPath = astar->findPath(snake.first(), snake.last(), obstacles);
+        AStarPath = astar.findPath(snake.first(), snake.last(), obstacles);
     }
 
 
@@ -75,6 +88,7 @@ void SnakeGame::updateGame()
         BFSFindFood();
         AutoChangeSnakeDirection(BFSPath);
     }else if (currentMode == GameMode::Mode4) {
+
         snakeDirection = qlearning->findPath(getCurrentSnakeState());
     }
     step += 1;
@@ -164,7 +178,7 @@ void SnakeGame::startMode(GameMode gm)
     QFile file(autoSaveFilename);
 
     if(gm == GameMode::Mode4){
-        qTable = qlearning->loadQTableFromFile(qTableFilename);
+        qlearning->loadQTableFromFile(qTableFilename);
     }
 }
 
@@ -211,7 +225,7 @@ void SnakeGame::saveSnakeToFile(const SnakeState state,const QString filename)
     QFile file(filename);
     if (file.open(QIODevice::WriteOnly | QIODevice::Append))
     {
-        QByteArray data = state.serialize();
+        QByteArray data = state.serializeAppend();
         file.write(data);
         file.close();
     }

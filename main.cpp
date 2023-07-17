@@ -8,8 +8,8 @@
 int main(int argc, char *argv[])
 {
     QApplication a(argc, argv);
-//    SnakeGameWindows w;
-//    w.show();
+    SnakeGameWindows w;
+    w.show();
 
 //    // 创建一个 SnakeGame 对象
 //    SnakeGame game;
@@ -23,8 +23,10 @@ int main(int argc, char *argv[])
 //    qLearning.train(game, numEpisodes, learningRate, discountFactor, explorationProb);
 
 
-    AIEvaluationWindows AIw;
-    AIw.show();
+//    AIEvaluationWindows AIw(nullptr, GameMode::Mode1);
+
+//    AIEvaluationWindows AIw(nullptr, "SnakeGameQTable_E1000.json");
+//    AIw.show();
 
     return a.exec();
 }

@@ -13,7 +13,6 @@ class AStar
 public:
     AStar();
 
-//    QVector<QPoint> getPath() const;
     QVector<QPoint> findPath(const QPoint& start, const QPoint& goal, const QVector<QPoint>& obstacles);
 
 private:

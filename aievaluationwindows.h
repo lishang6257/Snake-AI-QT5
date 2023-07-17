@@ -15,11 +15,14 @@ class AIEvaluationWindows : public QWidget
     Q_OBJECT
 
 public:
-    explicit AIEvaluationWindows(QWidget *parent = nullptr, QString qtableFilename = "");
+    explicit AIEvaluationWindows(QWidget *parent = nullptr);
+    explicit AIEvaluationWindows(QWidget *parent , GameMode gameMode);
+    explicit AIEvaluationWindows(QWidget *parent , QString qtableFilename);
     int AvgScore;
 
 private slots:
     void updateEvaluationStatus(int score);
+    void setGridUI();
 
 signals:
     void evaluateFinished();

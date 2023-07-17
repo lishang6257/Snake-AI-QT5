@@ -76,63 +76,31 @@ void QLearning::train(SnakeGame& game, int numEpisodes, double learningRate, dou
     }
 }
 
+QLearningTable QLearning::loadQTableFromFile(const QString &filename)
+{
+    QLearningTable table;
+    QFile file(filename);
+    if (file.open(QIODevice::ReadOnly))
+    {
+        QDataStream stream(&file);
+        stream >> table;
+        file.close();
+    }
+    qTable = table;
+    return table;
+}
+
 void QLearning::saveQTableToFile(const QString& filename) const
 {
     QFile file(filename);
     if (file.open(QIODevice::WriteOnly))
     {
-        QJsonObject qTableJson;
-        // 将 QTable 转换为 QJsonObject
-        // 例如，假设 QTable 中的数据结构为 QHash<SnakeState, QHash<int, double>>
-        for (const auto& state : qTable.keys())
-        {
-            QJsonObject stateJson;
-            const QHash<int, double>& actionValues = qTable.value(state);
-            for (int action : actionValues.keys())
-            {
-                stateJson[QString::number(action)] = actionValues.value(action);
-            }
-            qTableJson[state.serialize()] = stateJson;
-        }
-
-        // 将 QJsonObject 保存到文件
-        QJsonDocument doc(qTableJson);
-        file.write(doc.toJson());
+        QDataStream stream(&file);
+        stream << qTable;
         file.close();
     }
 }
 
-QLearingTable QLearning::loadQTableFromFile(const QString& filename)
-{
-    QFile file(filename);
-    if (file.open(QIODevice::ReadOnly))
-    {
-        QByteArray data = file.readAll();
-        QJsonDocument doc = QJsonDocument::fromJson(data);
-        QJsonObject qTableJson = doc.object();
-
-        QLearingTable newQTable;
-        // 将 QJsonObject 转换回 QTable
-        for (const QString& stateString : qTableJson.keys())
-        {
-            QJsonObject stateJson = qTableJson.value(stateString).toObject();
-            SnakeState state = SnakeState::deserialize(stateString.toUtf8());
-            QHash<int, double> actionValues;
-            for (const QString& actionString : stateJson.keys())
-            {
-                int action = actionString.toInt();
-                double value = stateJson.value(actionString).toDouble();
-                actionValues.insert(action, value);
-            }
-            newQTable.insert(state, actionValues);
-        }
-        qTable = newQTable;
-
-        file.close();
-        return qTable;
-    }
-    return QLearingTable();
-}
 
 SnakeDirection QLearning::findPath(const SnakeState& currentState)
 {
@@ -155,5 +123,5 @@ SnakeDirection QLearning::findPath(const SnakeState& currentState)
     }
 
     // 如果 Q 表中没有当前状态的数据，随机选择一个动作
-    return SnakeDirection::Right;
+    return SnakeDirection::Up;
 }

@@ -11,7 +11,9 @@ class AIEvaluator : public QThread
     Q_OBJECT
 
 public:
-    explicit AIEvaluator(QObject *parent = nullptr,QString qtableFilename = "");
+    explicit AIEvaluator(QObject *parent = nullptr);
+    explicit AIEvaluator(QObject *parent, GameMode gameMode);
+    explicit AIEvaluator(QObject *parent,QString qtableFilename);
 
 signals:
     void evaluationFinished(int score);

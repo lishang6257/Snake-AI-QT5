@@ -30,7 +30,8 @@ class SnakeGame : public QObject
     friend class SnakeState;
 
 public:
-    explicit SnakeGame(QString qTableFilename = "", bool autoSave = false);
+    explicit SnakeGame();
+    explicit SnakeGame(QString qTableFilename);
 
     void startMode(GameMode gm);
 
@@ -57,14 +58,14 @@ private:
     QString autoSaveFilename;
 
 
-    AStar *astar;
+    AStar astar;
     QVector<QPoint> AStarPath; // 存储A*算法找到的路径
 
-    BFS *bfs;
+    BFS bfs;
     QVector<QPoint> BFSPath; // 存储A*算法找到的路径
 
     QLearning *qlearning;
-    QLearingTable qTable;
+    QLearningTable qTable;
 
     void updateGame();
     void generateFood();

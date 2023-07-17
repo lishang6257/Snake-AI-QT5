@@ -16,7 +16,7 @@ const int UNIT_SIZE = SnakeGameSetting::UNIT_SIZE;
 SnakeGameWindows::SnakeGameWindows(QWidget *parent)
     : QMainWindow(parent),
     gameTimer(new QTimer(this)),
-    currentMode(GameMode::Mode1),
+    currentMode(GameMode::Mode4),
     startTime(QDateTime::currentDateTime()),
     gameDuringTime(0),
     isGameStarted(false),
@@ -27,12 +27,12 @@ SnakeGameWindows::SnakeGameWindows(QWidget *parent)
 
     connect(gameTimer, &QTimer::timeout, this, &SnakeGameWindows::updateSnakeGame);
 
-    replaySnakeGameState = getReplaySnakeGameState("SnakeGame_20230717_143654.dat");
+//    replaySnakeGameState = getReplaySnakeGameState("SnakeGame_20230717_143654.dat");
 
-    disconnect(gameTimer, &QTimer::timeout, this, &SnakeGameWindows::updateSnakeGame);
-    connect(gameTimer, &QTimer::timeout, this, &SnakeGameWindows::playCurrentStepSnakeGameState);
+//    disconnect(gameTimer, &QTimer::timeout, this, &SnakeGameWindows::updateSnakeGame);
+//    connect(gameTimer, &QTimer::timeout, this, &SnakeGameWindows::playCurrentStepSnakeGameState);
 
-    gameTimer->start(10);
+    gameTimer->start(50);
 }
 
 
@@ -141,6 +141,8 @@ void SnakeGameWindows::paintEvent(QPaintEvent *event)
         modeText = "Mode: 2 (Auto-AStar)";
     else if (currentMode == GameMode::Mode3)
         modeText = "Mode: 3 (Auto-BFS)";
+    else if (currentMode == GameMode::Mode4)
+        modeText = "Mode: 4 (QLearning)";
 
     painter.setPen(Qt::white);
     painter.setFont(QFont("Arial", 14, QFont::Bold));
