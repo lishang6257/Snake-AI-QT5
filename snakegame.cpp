@@ -78,19 +78,8 @@ void SnakeGame::AutoChangeSnakeDirection(const QVector<QPoint>& path)
     }
 }
 
-void SnakeGame::updateGame()
+void SnakeGame::SnakeGameMoveToNextState()
 {
-    if (currentMode == GameMode::Mode2) {
-        AStarFindFood();
-        AutoChangeSnakeDirection(AStarPath);
-    }
-    else if (currentMode == GameMode::Mode3) {
-        BFSFindFood();
-        AutoChangeSnakeDirection(BFSPath);
-    }else if (currentMode == GameMode::Mode4) {
-
-        snakeDirection = qlearning->findPath(getCurrentSnakeState());
-    }
     step += 1;
     QPoint newHead = snake.first();
     switch (snakeDirection)
@@ -128,8 +117,21 @@ void SnakeGame::updateGame()
         if(autoSave)
             saveSnakeToFile(getCurrentSnakeState(), autoSaveFilename);
     }
+}
 
-
+void SnakeGame::updateGame()
+{
+    if (currentMode == GameMode::Mode2) {
+        AStarFindFood();
+        AutoChangeSnakeDirection(AStarPath);
+    }
+    else if (currentMode == GameMode::Mode3) {
+        BFSFindFood();
+        AutoChangeSnakeDirection(BFSPath);
+    }else if (currentMode == GameMode::Mode4) {
+        snakeDirection = qlearning->findPath(getCurrentSnakeState());
+    }
+    SnakeGameMoveToNextState();
 }
 
 void SnakeGame::generateFood()
@@ -137,9 +139,15 @@ void SnakeGame::generateFood()
     QSet<QPoint> occupiedPositions(snake.begin(), snake.end());
     QPoint newFood;
     bool isOccupied = true;
+
+    QRandomGenerator randomGenerator(QRandomGenerator::global()->generate());
+//    randomGenerator.seed(0);
+    randomGenerator.seed(QTime::currentTime().msec());
+
+
     while (isOccupied) {
-        int x = QRandomGenerator::global()->bounded(SnakeGameSetting::UNIT_COUNT_X);
-        int y = QRandomGenerator::global()->bounded(SnakeGameSetting::UNIT_COUNT_Y);
+        int x = randomGenerator.bounded(SnakeGameSetting::UNIT_COUNT_X);
+        int y = randomGenerator.bounded(SnakeGameSetting::UNIT_COUNT_Y);
         newFood = QPoint(x, y);
         isOccupied = occupiedPositions.contains(newFood);
     }
@@ -176,10 +184,6 @@ void SnakeGame::startMode(GameMode gm)
     QString timestamp = now.toString("_yyyyMMdd_hhmmss");
     autoSaveFilename = "SnakeGame" + timestamp + ".dat";
     QFile file(autoSaveFilename);
-
-    if(gm == GameMode::Mode4){
-        qlearning->loadQTableFromFile(qTableFilename);
-    }
 }
 
 void SnakeGame::resetCurrentMode()
@@ -194,11 +198,6 @@ void SnakeGame::resetCurrentMode()
     QString timestamp = now.toString("_yyyyMMdd_hhmmss");
     autoSaveFilename = "SnakeGame" + timestamp + ".dat";
     QFile file(autoSaveFilename);
-}
-
-int SnakeGame::evaluateAutoAI()
-{
-    return score;
 }
 
 SnakeState SnakeGame::getCurrentSnakeState() const
@@ -231,10 +230,18 @@ void SnakeGame::saveSnakeToFile(const SnakeState state,const QString filename)
     }
 }
 
+void SnakeGame::loadQLearningQTable(QString qtableFilename) const
+{
+    if(currentMode == GameMode::Mode4){
+        qlearning->loadQTableFromFile(qtableFilename);
+    }
+}
+
 double SnakeGame::executeQLearingAction(int action)
 {
     // 备份当前贪吃蛇的位置，用于后面判断是否吃到食物
     QPoint preFood = food;
+    double preDisFromHeadToFood = (snake.first() - food).manhattanLength();
 
     // 更新贪吃蛇的移动方向
     switch (action)
@@ -254,7 +261,7 @@ double SnakeGame::executeQLearingAction(int action)
     }
 
     // 更新游戏状态，使贪吃蛇向当前方向移动一步
-    updateGame();
+    SnakeGameMoveToNextState();
 
     // 判断是否吃到了食物，计算奖励值
     double reward = 0.0;
@@ -269,6 +276,22 @@ double SnakeGame::executeQLearingAction(int action)
         reward = -10.0;
     }
 
+    //靠近食物奖励
+    double curDisFromHeadToFood = (snake.first() - preFood).manhattanLength();
+    if(curDisFromHeadToFood < preDisFromHeadToFood)
+    {
+        reward += 1.0;
+    }
+    else
+    {
+//        reward += 1.0;
+    }
+
     // 返回奖励值
     return reward;
+}
+
+int SnakeGame::evaluateAutoAI()
+{
+    return score;
 }

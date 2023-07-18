@@ -33,9 +33,9 @@ const QVector<QPoint> DirectionState = {QPoint(0,-1),QPoint(0,1),QPoint(-1,0),QP
 
 class SnakeGameSetting{
 public:
-    static const int UNIT_SIZE = 20;
-    static const int UNIT_COUNT_X = 30;
-    static const int UNIT_COUNT_Y = 20;
+    static const int UNIT_SIZE = 40;
+    static const int UNIT_COUNT_X = 10;
+    static const int UNIT_COUNT_Y = 10;
 };
 
 class SnakeState;
@@ -62,8 +62,28 @@ public:
     QPoint food;
     SnakeDirection currentDirection;
 
-    friend uint qHash(const SnakeState &state) {
-        return qHash(state.snake.first()) ^ qHash(state.food);
+    // 哈希函数实现
+    friend uint qHash(const SnakeState &state)
+    {
+        // 在这里，我们可以将SnakeState对象的各个属性拼接成一个字符串，并使用Qt提供的qHash函数进行哈希计算
+        // 这里使用Qt的QByteArray作为中间数据来拼接属性
+        QByteArray data;
+        data.append(QByteArray::number(state.UNIT_COUNT_X));
+        data.append(QByteArray::number(state.UNIT_COUNT_Y));
+        data.append(QByteArray::number(state.isGameStarted));
+
+        // 对蛇身体位置进行拼接
+        for (const QPoint &point : state.snake) {
+            data.append(QByteArray::number(point.x()));
+            data.append(QByteArray::number(point.y()));
+        }
+
+        // 对食物位置进行拼接
+        data.append(QByteArray::number(state.food.x()));
+        data.append(QByteArray::number(state.food.y()));
+
+        // 使用Qt提供的qHash函数计算哈希值
+        return qHash(data);
     }
 
     // 将对象序列化为二进制数据

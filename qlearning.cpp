@@ -14,6 +14,7 @@ void QLearning::train(SnakeGame& game, int numEpisodes, double learningRate, dou
     // 创建一个新的 QRandomGenerator 实例
     QRandomGenerator randomGenerator(QRandomGenerator::global()->generate());
     randomGenerator.seed(QTime::currentTime().msec());
+//    randomGenerator.seed(0);
 
     // 开始执行 Q 学习算法
     for (int episode = 0; episode < numEpisodes; ++episode)

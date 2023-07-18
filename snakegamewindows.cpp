@@ -12,11 +12,34 @@ const int WIDTH = SnakeGameSetting::UNIT_SIZE * SnakeGameSetting::UNIT_COUNT_X;
 const int HEIGHT = SnakeGameSetting::UNIT_SIZE * SnakeGameSetting::UNIT_COUNT_Y;
 
 const int UNIT_SIZE = SnakeGameSetting::UNIT_SIZE;
-
 SnakeGameWindows::SnakeGameWindows(QWidget *parent)
     : QMainWindow(parent),
     gameTimer(new QTimer(this)),
     currentMode(GameMode::Mode4),
+    startTime(QDateTime::currentDateTime()),
+    gameDuringTime(0),
+    isGameStarted(false),
+    replayStep(0)
+{
+    resize(WIDTH, HEIGHT);
+    setWindowTitle("Snake Game");
+
+    connect(gameTimer, &QTimer::timeout, this, &SnakeGameWindows::updateSnakeGame);
+
+    //    replaySnakeGameState = getReplaySnakeGameState("SnakeGame_20230717_143654.dat");
+
+    //    disconnect(gameTimer, &QTimer::timeout, this, &SnakeGameWindows::updateSnakeGame);
+    //    connect(gameTimer, &QTimer::timeout, this, &SnakeGameWindows::playCurrentStepSnakeGameState);
+
+    //    gameTimer->start(50);
+    startSnakeGameMode(currentMode, 20);
+}
+
+
+SnakeGameWindows::SnakeGameWindows(QWidget *parent, GameMode gm)
+    : QMainWindow(parent),
+    gameTimer(new QTimer(this)),
+    currentMode(gm),
     startTime(QDateTime::currentDateTime()),
     gameDuringTime(0),
     isGameStarted(false),
@@ -32,7 +55,32 @@ SnakeGameWindows::SnakeGameWindows(QWidget *parent)
 //    disconnect(gameTimer, &QTimer::timeout, this, &SnakeGameWindows::updateSnakeGame);
 //    connect(gameTimer, &QTimer::timeout, this, &SnakeGameWindows::playCurrentStepSnakeGameState);
 
-    gameTimer->start(50);
+//    gameTimer->start(50);
+    startSnakeGameMode(currentMode, 20);
+}
+
+SnakeGameWindows::SnakeGameWindows(QWidget *parent, QString qtableFilename)
+    : QMainWindow(parent),
+    gameTimer(new QTimer(this)),
+    currentMode(GameMode::Mode4),
+    startTime(QDateTime::currentDateTime()),
+    gameDuringTime(0),
+    isGameStarted(false),
+    replayStep(0)
+{
+    resize(WIDTH, HEIGHT);
+    setWindowTitle("Snake Game");
+
+    connect(gameTimer, &QTimer::timeout, this, &SnakeGameWindows::updateSnakeGame);
+
+    //    replaySnakeGameState = getReplaySnakeGameState("SnakeGame_20230717_143654.dat");
+
+    //    disconnect(gameTimer, &QTimer::timeout, this, &SnakeGameWindows::updateSnakeGame);
+    //    connect(gameTimer, &QTimer::timeout, this, &SnakeGameWindows::playCurrentStepSnakeGameState);
+
+    //    gameTimer->start(50);
+    startSnakeGameMode(currentMode, 100);
+    snakeGame.loadQLearningQTable(qtableFilename);
 }
 
 
@@ -62,19 +110,19 @@ void SnakeGameWindows::paintEvent(QPaintEvent *event)
     painter.setPen(Qt::NoPen);
     painter.setPen(Qt::black);
 
-    // »æÖÆ´¹Ö±ÏßÌõ
+    // ï¿½ï¿½ï¿½Æ´ï¿½Ö±ï¿½ï¿½ï¿½ï¿½
     for (int x = 0; x <= WIDTH; x += UNIT_SIZE)
     {
         painter.drawLine(x, 0, x, HEIGHT);
     }
 
-    // »æÖÆË®Æ½ÏßÌõ
+    // ï¿½ï¿½ï¿½ï¿½Ë®Æ½ï¿½ï¿½ï¿½ï¿½
     for (int y = 0; y <= HEIGHT; y += UNIT_SIZE)
     {
         painter.drawLine(0, y, WIDTH, y);
     }
 
-    // »æÖÆÌ°³ÔÉßÇûÌå
+    // ï¿½ï¿½ï¿½ï¿½Ì°ï¿½ï¿½ï¿½ï¿½ï¿½ï¿½ï¿½ï¿½
     for (int i = 1; i < snakeGame.snake.size(); ++i)
     {
         QPoint point = snakeGame.snake.at(i);
@@ -103,7 +151,7 @@ void SnakeGameWindows::paintEvent(QPaintEvent *event)
 
     }
     else if (currentMode == GameMode::Mode2) {
-        // »æÖÆA*Ñ°Â·Â·¾¶
+        // ï¿½ï¿½ï¿½ï¿½A*Ñ°Â·Â·ï¿½ï¿½
         painter.setPen(Qt::red);
         painter.setBrush(Qt::NoBrush);
         for (const QPoint& point : snakeGame.AStarPath) {
@@ -112,7 +160,7 @@ void SnakeGameWindows::paintEvent(QPaintEvent *event)
 
     }
     else if (currentMode == GameMode::Mode3) {
-        // »æÖÆBFSÑ°Â·Â·¾¶
+        // ï¿½ï¿½ï¿½ï¿½BFSÑ°Â·Â·ï¿½ï¿½
         painter.setPen(Qt::darkYellow);
         painter.setBrush(Qt::NoBrush);
         for (const QPoint& point : snakeGame.BFSPath) {
@@ -191,7 +239,11 @@ void SnakeGameWindows::mousePressEvent(QMouseEvent *event)
             currentMode = GameMode::Mode3;
         }
         else if (currentMode == GameMode::Mode3){
-            startSnakeGameMode(GameMode::Mode1, 200);
+            startSnakeGameMode(GameMode::Mode4);
+            currentMode = GameMode::Mode4;
+        }
+        else if (currentMode == GameMode::Mode4){
+            startSnakeGameMode(GameMode::Mode1,200);
             currentMode = GameMode::Mode1;
         }
     }
@@ -222,7 +274,7 @@ void SnakeGameWindows::playCurrentStepSnakeGameState()
 
 QVector<SnakeState> SnakeGameWindows::getReplaySnakeGameState(QString filename)
 {
-    // ´ÓÎÄ¼þÖÐ¶ÁÈ¡ QVector<SnakeState> ¶ÔÏó
+    // ï¿½ï¿½ï¿½Ä¼ï¿½ï¿½Ð¶ï¿½È¡ QVector<SnakeState> ï¿½ï¿½ï¿½ï¿½
     QFile file(filename);
     QVector<SnakeState> states;
     if (file.open(QIODevice::ReadOnly))

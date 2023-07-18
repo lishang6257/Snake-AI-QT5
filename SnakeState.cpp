@@ -18,7 +18,7 @@ SnakeState::SnakeState()
 
 // 自定义拷贝构造函数
 SnakeState::SnakeState(const SnakeState &other)
-    : QObject(), // 必须调用父类的拷贝构造函数
+    : QObject(),
     UNIT_COUNT_X(other.UNIT_COUNT_X),
     UNIT_COUNT_Y(other.UNIT_COUNT_Y),
     step(other.step),
@@ -34,16 +34,14 @@ SnakeState& SnakeState::operator=(const SnakeState &other)
     if (this == &other) // 检查自我赋值
         return *this;
 
-    // 调用父类的拷贝赋值运算符
-    //    QObject::operator=(other);
-
     // 复制其他成员变量
     UNIT_COUNT_X = other.UNIT_COUNT_X;
     UNIT_COUNT_Y = other.UNIT_COUNT_Y;
     isGameStarted = other.isGameStarted;
-    currentGameMode = other.currentGameMode;
     snake = other.snake;
     food = other.food;
+
+    currentGameMode = other.currentGameMode;
     currentDirection = other.currentDirection;
     step = other.step;
 
@@ -57,12 +55,9 @@ bool SnakeState::operator==(const SnakeState &other) const
 
     return UNIT_COUNT_X == other.UNIT_COUNT_X &&
            UNIT_COUNT_Y == other.UNIT_COUNT_Y &&
-           step == other.step &&
            isGameStarted == other.isGameStarted &&
-           currentGameMode == other.currentGameMode &&
            snake == other.snake &&
-           food == other.food &&
-           currentDirection == other.currentDirection;
+           food == other.food;
 }
 
 QByteArray SnakeState::serialize() const

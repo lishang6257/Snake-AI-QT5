@@ -22,6 +22,8 @@ class SnakeGameWindows : public QMainWindow
 
 public:
     explicit SnakeGameWindows(QWidget *parent = nullptr);
+    explicit SnakeGameWindows(QWidget *parent, GameMode gm);
+    explicit SnakeGameWindows(QWidget *parent, QString qtableFilename);
     QVector<SnakeState> getReplaySnakeGameState(QString filename);
     void playSnakeGameState(const SnakeState &snakeState);
     void playCurrentStepSnakeGameState();

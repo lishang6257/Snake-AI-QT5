@@ -36,6 +36,7 @@ public:
     void startMode(GameMode gm);
 
     SnakeState getCurrentSnakeState() const;
+    void loadQLearningQTable(QString qtableFilename) const;
 
     bool isGameOver();
     void resetCurrentMode();
@@ -67,6 +68,7 @@ private:
     QLearning *qlearning;
     QLearningTable qTable;
 
+    void SnakeGameMoveToNextState();
     void updateGame();
     void generateFood();
     void BFSFindFood();
