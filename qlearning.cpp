@@ -71,9 +71,9 @@ void QLearning::train(SnakeGame& game, int numEpisodes, double learningRate, dou
             double updatedQValue = currentQValue + learningRate * (reward + discountFactor * maxNextQValue - currentQValue);
             qTable[currentState][action] = updatedQValue;
         }
-        QString autoSaveFilename = "SnakeGameQTable_E" + QString::number(episode) + ".json";
+        QString autoSaveFilename = "./qTable/SnakeGameQTable_E" + QString::number(episode) + ".dat";
         qDebug() << "epoch " + QString::number(episode);
-        if((episode%50) == 0)saveQTableToFile(autoSaveFilename);
+        if((episode%500) == 0)saveQTableToFile(autoSaveFilename);
     }
 }
 
@@ -108,7 +108,7 @@ SnakeDirection QLearning::findPath(const SnakeState& currentState)
     if (qTable.contains(currentState) && !qTable[currentState].isEmpty())
     {
         int bestAction = -1;
-        double maxQValue = std::numeric_limits<double>::min();
+        double maxQValue = - std::numeric_limits<double>::max();
 
         for (const int action : qTable[currentState].keys())
         {

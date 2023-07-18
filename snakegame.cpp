@@ -131,6 +131,7 @@ void SnakeGame::updateGame()
     }else if (currentMode == GameMode::Mode4) {
         snakeDirection = qlearning->findPath(getCurrentSnakeState());
     }
+    qDebug() << QString::number((int)snakeDirection);
     SnakeGameMoveToNextState();
 }
 
@@ -278,14 +279,18 @@ double SnakeGame::executeQLearingAction(int action)
 
     //靠近食物奖励
     double curDisFromHeadToFood = (snake.first() - preFood).manhattanLength();
-    if(curDisFromHeadToFood < preDisFromHeadToFood)
-    {
-        reward += 1.0;
-    }
-    else
-    {
-//        reward += 1.0;
-    }
+
+//    reward += 0.01 * 1./(preDisFromHeadToFood - curDisFromHeadToFood);
+
+//    if(curDisFromHeadToFood < preDisFromHeadToFood)
+//    {
+//        reward += 0.001;
+//    }
+//    else
+//    {
+
+//        reward -= 0.0001;
+//    }
 
     // 返回奖励值
     return reward;
