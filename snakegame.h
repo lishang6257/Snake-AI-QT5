@@ -31,6 +31,7 @@ class SnakeGame : public QObject
 
 public:
     explicit SnakeGame();
+    explicit SnakeGame(const SnakeGame&copySnakeGame);
     explicit SnakeGame(QString qTableFilename);
 
     void startMode(GameMode gm);

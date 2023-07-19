@@ -8,7 +8,7 @@
 int main(int argc, char *argv[])
 {
     QApplication a(argc, argv);
-    SnakeGameWindows w(nullptr, "./qTable/SnakeGameQTable_E10000.dat");
+    SnakeGameWindows w(nullptr, GameMode::Mode2);
     w.show();
 
 //    //    AIEvaluationWindows AIw(nullptr, GameMode::Mode1);

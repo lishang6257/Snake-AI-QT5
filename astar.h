@@ -13,7 +13,8 @@ class AStar
 public:
     AStar();
 
-    QVector<QPoint> findPath(const QPoint& start, const QPoint& goal, const QVector<QPoint>& obstacles);
+    QVector<QPoint> findPath(const QPoint& start, const QPoint& goal, const QVector<QPoint>& obstacles, bool whetherLonger = false);
+    QVector<QPoint> findLongestPath(const QPoint& start, const QPoint& goal, const QVector<QPoint>& obstacles);
 
 private:
     QVector<QPoint> path;

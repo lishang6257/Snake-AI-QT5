@@ -14,10 +14,28 @@ SnakeGame::SnakeGame()
     currentMode(GameMode::Mode1),
     step(0),
     isGameStarted(false),
-    autoSave(false),
+    autoSave(true),
     qlearning(new QLearning())
 {
     snake.append(QPoint(SnakeGameSetting::UNIT_COUNT_X / 2, SnakeGameSetting::UNIT_COUNT_Y / 2));
+}
+
+SnakeGame::SnakeGame(const SnakeGame&copySnakeGame)
+    :snake(copySnakeGame.snake),
+    snakeDirection(copySnakeGame.snakeDirection),
+    food(copySnakeGame.food),
+    score(copySnakeGame.score),
+    currentMode(copySnakeGame.currentMode),
+    step(copySnakeGame.step),
+    replayFilename(copySnakeGame.replayFilename),
+    qTableFilename(copySnakeGame.qTableFilename),
+    isGameStarted(copySnakeGame.isGameStarted),
+    autoSave(copySnakeGame.autoSave),
+    autoSaveFilename(copySnakeGame.autoSaveFilename),
+    AStarPath(copySnakeGame.AStarPath),
+    BFSPath(copySnakeGame.BFSPath),
+    qlearning(copySnakeGame.qlearning)
+{
 }
 
 SnakeGame::SnakeGame(QString qTableFilename)
@@ -27,7 +45,7 @@ SnakeGame::SnakeGame(QString qTableFilename)
     step(0),
     qTableFilename(qTableFilename),
     isGameStarted(false),
-    autoSave(false),
+    autoSave(true),
     qlearning(new QLearning())
 {
     snake.append(QPoint(SnakeGameSetting::UNIT_COUNT_X / 2, SnakeGameSetting::UNIT_COUNT_Y / 2));
@@ -52,13 +70,39 @@ void SnakeGame::AStarFindFood()
     QVector<QPoint> obstacles = snake.toVector();
     if(!obstacles.empty()) obstacles.removeFirst();
     if(!obstacles.empty()) obstacles.removeLast();
-    AStarPath = astar.findPath(snake.first(), food, obstacles);
+    QVector<QPoint> SnakeToFood = astar.findPath(snake.first(), food, obstacles);
+    bool flag = (SnakeGameSetting::UNIT_COUNT_X%2 == 1) && (SnakeGameSetting::UNIT_COUNT_Y%2 == 1);
+    if(flag && (snake.length() >= SnakeGameSetting::UNIT_COUNT_X * SnakeGameSetting::UNIT_COUNT_Y - 1)){
+        AStarPath = SnakeToFood;
+    }else
+    {
+        SnakeGame virtualSnakeGame(*this);
+        virtualSnakeGame.autoSave = false;
+        bool haveDirectPathSnakeToFood = SnakeToFood.empty()?false:(SnakeToFood.last() == food);
+        QVector<QPoint> tmpSnakeToFood = SnakeToFood;
+        while (!tmpSnakeToFood.empty()) {
+            virtualSnakeGame.AutoChangeSnakeDirection(tmpSnakeToFood);
+            virtualSnakeGame.SnakeGameMoveToNextState();
+            tmpSnakeToFood.removeFirst();
+        }
 
-    if (AStarPath.isEmpty()){
-        AStarPath = astar.findPath(snake.first(), snake.last(), obstacles);
+        QVector<QPoint> vobstacles = virtualSnakeGame.snake.toVector();
+        if(!vobstacles.empty()) vobstacles.removeFirst();
+        if(!vobstacles.empty()) vobstacles.removeLast();
+        QVector<QPoint> virtualSnakeToTail = astar.findPath(virtualSnakeGame.snake.first(), virtualSnakeGame.snake.last(), vobstacles);
+
+        bool haveDirectPathVirtualSnakeToTail = virtualSnakeToTail.empty()?false:(virtualSnakeToTail.last() == virtualSnakeGame.snake.last());
+
+        QVector<QPoint> SnakeToTail = astar.findPath(snake.first(), snake.last(), obstacles);
+
+        if(haveDirectPathSnakeToFood && haveDirectPathVirtualSnakeToTail)
+        {
+            AStarPath = SnakeToFood;
+        }
+        else{
+            AStarPath = astar.findPath(snake.first(), snake.last(), obstacles, true);
+        }
     }
-
-
 }
 
 void SnakeGame::AutoChangeSnakeDirection(const QVector<QPoint>& path)
@@ -138,6 +182,13 @@ void SnakeGame::updateGame()
 void SnakeGame::generateFood()
 {
     QSet<QPoint> occupiedPositions(snake.begin(), snake.end());
+
+    if(occupiedPositions.size() == SnakeGameSetting::UNIT_COUNT_X*SnakeGameSetting::UNIT_COUNT_Y)
+    {
+        isGameStarted = false;
+        return;
+    }
+
     QPoint newFood;
     bool isOccupied = true;
 
@@ -161,6 +212,7 @@ bool SnakeGame::isGameOver(const QPoint& head) const
     {
         return true;
     }
+//    QSet<QPoint> asnake(snake.begin(), snake.end());
     for (int i = 1; i < snake.size()-1; ++i)
     {
         if (head == snake.at(i))

@@ -34,8 +34,8 @@ const QVector<QPoint> DirectionState = {QPoint(0,-1),QPoint(0,1),QPoint(-1,0),QP
 class SnakeGameSetting{
 public:
     static const int UNIT_SIZE = 40;
-    static const int UNIT_COUNT_X = 6;
-    static const int UNIT_COUNT_Y = 6;
+    static const int UNIT_COUNT_X = 29;
+    static const int UNIT_COUNT_Y = 29;
 };
 
 class SnakeState;

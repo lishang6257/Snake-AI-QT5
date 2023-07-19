@@ -32,7 +32,7 @@ SnakeGameWindows::SnakeGameWindows(QWidget *parent)
     //    connect(gameTimer, &QTimer::timeout, this, &SnakeGameWindows::playCurrentStepSnakeGameState);
 
     //    gameTimer->start(50);
-    startSnakeGameMode(currentMode, 20);
+    startSnakeGameMode(currentMode, 1000);
 }
 
 
@@ -50,13 +50,13 @@ SnakeGameWindows::SnakeGameWindows(QWidget *parent, GameMode gm)
 
     connect(gameTimer, &QTimer::timeout, this, &SnakeGameWindows::updateSnakeGame);
 
-//    replaySnakeGameState = getReplaySnakeGameState("SnakeGame_20230717_143654.dat");
+//    replaySnakeGameState = getReplaySnakeGameState("SnakeGame_20230719_005522.dat");
 
 //    disconnect(gameTimer, &QTimer::timeout, this, &SnakeGameWindows::updateSnakeGame);
 //    connect(gameTimer, &QTimer::timeout, this, &SnakeGameWindows::playCurrentStepSnakeGameState);
 
 //    gameTimer->start(50);
-    startSnakeGameMode(currentMode, 20);
+    startSnakeGameMode(currentMode, 1);
 }
 
 SnakeGameWindows::SnakeGameWindows(QWidget *parent, QString qtableFilename)
@@ -126,13 +126,15 @@ void SnakeGameWindows::paintEvent(QPaintEvent *event)
     for (int i = 1; i < snakeGame.snake.size(); ++i)
     {
         QPoint point = snakeGame.snake.at(i);
-        painter.setPen(Qt::black);
+        painter.setPen(QPen(Qt::black,3));
         painter.setBrush(Qt::green);
         painter.drawRect(point.x() * UNIT_SIZE, point.y() * UNIT_SIZE, UNIT_SIZE, UNIT_SIZE);
+
+
         QPoint prePoint = snakeGame.snake.at(i - 1);
         if(prePoint == snakeGame.snake.first()) continue;
         QPoint dirPoint = point - prePoint;
-        painter.setPen(Qt::white);
+        painter.setPen(QPen(Qt::green,3));
         if(dirPoint.x() == 1){
             painter.drawLine(QLine(point.x() * UNIT_SIZE,point.y() * UNIT_SIZE,point.x() * UNIT_SIZE,(point.y()+1) * UNIT_SIZE));
         }
@@ -145,6 +147,7 @@ void SnakeGameWindows::paintEvent(QPaintEvent *event)
         else if(dirPoint.y() == -1){
             painter.drawLine(QLine(prePoint.x() * UNIT_SIZE,prePoint.y() * UNIT_SIZE,(prePoint.x()+1) * UNIT_SIZE,prePoint.y() * UNIT_SIZE));
         }
+
 
     }
     if (currentMode == GameMode::Mode1) {

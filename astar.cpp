@@ -1,4 +1,4 @@
-﻿// -*- coding: utf-8 -*-
+// -*- coding: utf-8 -*-
 
 #include "astar.h"
 #include <QHash>
@@ -11,7 +11,7 @@ AStar::AStar()
 
 }
 
-QVector<QPoint> AStar::findPath(const QPoint& start, const QPoint& goal, const QVector<QPoint>& obstacles)
+QVector<QPoint> AStar::findPath(const QPoint& start, const QPoint& goal, const QVector<QPoint>& obstacles, bool whetherLonger)
 {
     path.clear();
 
@@ -27,13 +27,26 @@ QVector<QPoint> AStar::findPath(const QPoint& start, const QPoint& goal, const Q
     fScore.insert(start, 0);
 
     while (!openList.isEmpty()) {
-        // Find the point with the lowest fScore
-        int minFScore = INT_MAX;
         QPoint currentPoint;
-        for (const auto& point : openList) {
-            if (fScore[point] < minFScore) {
-                minFScore = fScore[point];
-                currentPoint = point;
+        int minFScore;
+        if(!whetherLonger){
+            // Find the point with the lowest fScore
+            minFScore = INT_MAX;
+            for (const auto& point : openList) {
+                if (fScore[point] < minFScore) {
+                    minFScore = fScore[point];
+                    currentPoint = point;
+                }
+            }
+        }
+        else{
+            // Find the point with the highest fScore
+            minFScore = INT_MIN;
+            for (const auto& point : openList) {
+                if (fScore[point] > minFScore) {
+                    minFScore = fScore[point];
+                    currentPoint = point;
+                }
             }
         }
 
@@ -50,16 +63,16 @@ QVector<QPoint> AStar::findPath(const QPoint& start, const QPoint& goal, const Q
         closedList.append(currentPoint);
 
         for (int i = 0; i < 4; ++i) {
-            int newX = currentPoint.x() + DirectionState[i].x();
-            int newY = currentPoint.y() + DirectionState[i].y();
-            QPoint neighbor(newX, newY);
+            QPoint neighbor(currentPoint + DirectionState[i]);
 
             if (!isPointValid(neighbor, obstacles) || closedList.contains(neighbor))
                 continue;
 
             int tentativeGScore = gScore[currentPoint] + 1;
 
-            if (!openList.contains(neighbor) || tentativeGScore < gScore[neighbor]) {
+            if (!openList.contains(neighbor) ||
+                ((!whetherLonger && (tentativeGScore < gScore[neighbor])) ||
+                 (whetherLonger && (tentativeGScore > gScore[neighbor])) )) {
                 parentMap[neighbor] = currentPoint;
                 gScore[neighbor] = tentativeGScore;
                 fScore[neighbor] = tentativeGScore + heuristic(neighbor, goal);
@@ -69,25 +82,9 @@ QVector<QPoint> AStar::findPath(const QPoint& start, const QPoint& goal, const Q
             }
         }
     }
-    // Reconstruct the path
-    if (path.empty()) {
-        int maxFScore = INT_MIN;
-        QPoint currentPoint;
-        for (const auto& point : closedList) {
-            if (fScore[point] > maxFScore) {
-                maxFScore = fScore[point];
-                currentPoint = point;
-            }
-        }
-
-        while (currentPoint != start) {
-            path.prepend(currentPoint);
-            currentPoint = parentMap[currentPoint];
-        }
-    }
-
     return path;
 }
+
 
 int AStar::heuristic(const QPoint& point, const QPoint& goal) const
 {
