@@ -29,7 +29,8 @@ HEADERS += \
     qlearning.h \
     snakegame.h \
     snakegamewindows.h \
-    utils.h
+    utils.h \
+    简介.h
 
 FORMS += \
     snakegame.ui

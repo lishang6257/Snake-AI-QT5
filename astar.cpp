@@ -70,7 +70,14 @@ QVector<QPoint> AStar::findPath(const QPoint& start, const QPoint& goal, const Q
             if (!isPointValid(neighbor, obstacles) || closedList.contains(neighbor))
                 continue;
 
-            int tentativeGScore = gScore[currentPoint] + 1; // 计算起点经过当前节点到相邻节点的路径长度
+            int tentativeGScore = gScore[currentPoint] + distanceCost; // 计算起点经过当前节点到相邻节点的路径长度
+            //为了减少蛇身转向设置
+            bool turnFlag = (currentPoint - parentMap[currentPoint] == DirectionState[i]);
+
+            if(!whetherLonger)
+                tentativeGScore += (turnFlag?0:1)*turnCost;
+            else
+                tentativeGScore -= (turnFlag?0:1)*turnCost;
 
             // 如果相邻节点不在待探索列表中或者新路径长度更短（或更长）则更新其代价和父节点
             if (!openList.contains(neighbor) ||
@@ -91,7 +98,7 @@ QVector<QPoint> AStar::findPath(const QPoint& start, const QPoint& goal, const Q
 // 启发式函数，用于估计两个点之间的距离，这里使用曼哈顿距离
 int AStar::heuristic(const QPoint& point, const QPoint& goal) const
 {
-    return (goal - point).manhattanLength();
+    return (goal - point).manhattanLength() * distanceCost;
 }
 
 // 判断一个点是否在地图范围内且没有障碍物
