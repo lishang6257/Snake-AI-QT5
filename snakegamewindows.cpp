@@ -110,19 +110,16 @@ void SnakeGameWindows::paintEvent(QPaintEvent *event)
     painter.setPen(Qt::NoPen);
     painter.setPen(Qt::black);
 
-    // ���ƴ�ֱ����
     for (int x = 0; x <= WIDTH; x += UNIT_SIZE)
     {
         painter.drawLine(x, 0, x, HEIGHT);
     }
 
-    // ����ˮƽ����
     for (int y = 0; y <= HEIGHT; y += UNIT_SIZE)
     {
         painter.drawLine(0, y, WIDTH, y);
     }
 
-    // ����̰��������
     for (int i = 1; i < snakeGame.snake.size(); ++i)
     {
         QPoint point = snakeGame.snake.at(i);
@@ -154,7 +151,6 @@ void SnakeGameWindows::paintEvent(QPaintEvent *event)
 
     }
     else if (currentMode == GameMode::Mode2) {
-        // ����A*Ѱ··��
         painter.setPen(Qt::red);
         painter.setBrush(Qt::NoBrush);
         for (const QPoint& point : snakeGame.AStarPath) {
@@ -163,7 +159,6 @@ void SnakeGameWindows::paintEvent(QPaintEvent *event)
 
     }
     else if (currentMode == GameMode::Mode3) {
-        // ����BFSѰ··��
         painter.setPen(Qt::darkYellow);
         painter.setBrush(Qt::NoBrush);
         for (const QPoint& point : snakeGame.BFSPath) {
@@ -277,7 +272,6 @@ void SnakeGameWindows::playCurrentStepSnakeGameState()
 
 QVector<SnakeState> SnakeGameWindows::getReplaySnakeGameState(QString filename)
 {
-    // ���ļ��ж�ȡ QVector<SnakeState> ����
     QFile file(filename);
     QVector<SnakeState> states;
     if (file.open(QIODevice::ReadOnly))

@@ -6,14 +6,16 @@
 #include "qobject.h"
 #include <QPoint>
 
+// æ¸¸æˆæ¨¡å¼æšä¸¾
 enum class GameMode {
-    Mode1,//Mannaul
-    Mode2,//A*
-    Mode3,//BFS
-    Mode4,//QLearning
-    Mode5 //replay
+    Mode1, // Mannual
+    Mode2, // A*
+    Mode3, // BFS
+    Mode4, // QLearning
+    Mode5  // Replay
 };
 
+// è´ªåƒè›‡ç§»åŠ¨æ–¹å‘æšä¸¾
 enum class SnakeDirection {
     Up,
     Down,
@@ -21,7 +23,7 @@ enum class SnakeDirection {
     Right
 };
 
-// ¶¨ÒåÌ°³ÔÉßµÄ¶¯×÷
+// è´ªåƒè›‡åŠ¨ä½œæšä¸¾
 enum class SnakeAction {
     ActionUp,
     ActionDown,
@@ -29,30 +31,35 @@ enum class SnakeAction {
     ActionRight
 };
 
-const QVector<QPoint> DirectionState = {QPoint(0,-1),QPoint(0,1),QPoint(-1,0),QPoint(1,0)};
+// å®šä¹‰è´ªåƒè›‡çš„å››ä¸ªç§»åŠ¨æ–¹å‘
+static const QVector<QPoint> DirectionState = {QPoint(0, -1), QPoint(0, 1), QPoint(-1, 0), QPoint(1, 0)};
 
-class SnakeGameSetting{
+class SnakeGameSetting {
 public:
-    static const int UNIT_SIZE = 40;
-    static const int UNIT_COUNT_X = 29;
-    static const int UNIT_COUNT_Y = 29;
+    static const int UNIT_SIZE = 40; // å•ä½å¤§å°
+    static const int UNIT_COUNT_X = 17; // æ°´å¹³æ–¹å‘å•å…ƒæ ¼æ•°
+    static const int UNIT_COUNT_Y = 17; // å‚ç›´æ–¹å‘å•å…ƒæ ¼æ•°
 };
 
 class SnakeState;
+// è‡ªå®šä¹‰å“ˆå¸Œå‡½æ•°ï¼Œç”¨äºåœ¨ QLearningTable ä¸­ä¿å­˜çŠ¶æ€å’Œå¯¹åº”çš„ Q å€¼
+inline uint qHash(const SnakeState &state);
 
-// ¶¨Òå Q ±íµÄÀàĞÍ£¬ÓÃÓÚ±£´æ×´Ì¬ºÍ¶¯×÷¶ÔÓ¦µÄ Q Öµ
+// å®šä¹‰ QLearningTable ç±»å‹ï¼Œç”¨äºä¿å­˜çŠ¶æ€å’ŒåŠ¨ä½œå¯¹åº”çš„ Q å€¼
 typedef QHash<SnakeState, QHash<int, double>> QLearningTable;
+
+// é‡è½½æ•°æ®æµè¾“å‡ºæ“ä½œç¬¦ï¼Œç”¨äºå°† QLearningTable å†™å…¥æ•°æ®æµ
 QDataStream &operator<<(QDataStream &out, const QLearningTable &table);
+// é‡è½½æ•°æ®æµè¾“å…¥æ“ä½œç¬¦ï¼Œç”¨äºä»æ•°æ®æµä¸­è¯»å– QLearningTable
 QDataStream &operator>>(QDataStream &in, QLearningTable &table);
-class SnakeState : QObject
-{
+
+class SnakeState : QObject {
 public:
     SnakeState();
-    SnakeState(const SnakeState &other); // ×Ô¶¨Òå¿½±´¹¹Ôìº¯Êı
+    SnakeState(const SnakeState &other); // è‡ªå®šä¹‰æ‹·è´æ„é€ å‡½æ•°
     SnakeState& operator=(const SnakeState &other);
     bool operator==(const SnakeState &other) const;
 
-//    SnakeGameSetting snakeGameSetting;
     int UNIT_COUNT_X;
     int UNIT_COUNT_Y;
     int step;
@@ -62,43 +69,16 @@ public:
     QPoint food;
     SnakeDirection currentDirection;
 
-    // ¹şÏ£º¯ÊıÊµÏÖ
-    friend uint qHash(const SnakeState &state)
-    {
-        // ÔÚÕâÀï£¬ÎÒÃÇ¿ÉÒÔ½«SnakeState¶ÔÏóµÄ¸÷¸öÊôĞÔÆ´½Ó³ÉÒ»¸ö×Ö·û´®£¬²¢Ê¹ÓÃQtÌá¹©µÄqHashº¯Êı½øĞĞ¹şÏ£¼ÆËã
-        // ÕâÀïÊ¹ÓÃQtµÄQByteArray×÷ÎªÖĞ¼äÊı¾İÀ´Æ´½ÓÊôĞÔ
-        QByteArray data;
-        data.append(QByteArray::number(state.UNIT_COUNT_X));
-        data.append(QByteArray::number(state.UNIT_COUNT_Y));
-        data.append(QByteArray::number(state.isGameStarted));
-
-        // ¶ÔÉßÉíÌåÎ»ÖÃ½øĞĞÆ´½Ó
-        for (const QPoint &point : state.snake) {
-            data.append(QByteArray::number(point.x()));
-            data.append(QByteArray::number(point.y()));
-        }
-
-        // ¶ÔÊ³ÎïÎ»ÖÃ½øĞĞÆ´½Ó
-        data.append(QByteArray::number(state.food.x()));
-        data.append(QByteArray::number(state.food.y()));
-
-        // Ê¹ÓÃQtÌá¹©µÄqHashº¯Êı¼ÆËã¹şÏ£Öµ
-        return qHash(data);
-    }
-
-    // ½«¶ÔÏóĞòÁĞ»¯Îª¶ş½øÖÆÊı¾İ
+    // å°†å¯¹è±¡åºåˆ—åŒ–ä¸ºäºŒè¿›åˆ¶æ•°æ®
     QByteArray serialize() const;
     QByteArray serializeAppend() const;
-    // ´Ó¶ş½øÖÆÊı¾İÖĞ·´ĞòÁĞ»¯¶ÔÏó
+    // ä»äºŒè¿›åˆ¶æ•°æ®ä¸­ååºåˆ—åŒ–å¯¹è±¡
     static SnakeState deserialize(const QByteArray &data);
 
-    // ½« QVector<SnakeState> ĞòÁĞ»¯Îª¶ş½øÖÆÊı
+    // å°† QVector<SnakeState> åºåˆ—åŒ–ä¸ºäºŒè¿›åˆ¶æ•°æ®
     QByteArray serialize(const QVector<SnakeState> &states) const;
-    // ´Ó¶ş½øÖÆÊı¾İÖĞ·´ĞòÁĞ»¯ QVector<SnakeState> ¶ÔÏó
+    // ä»äºŒè¿›åˆ¶æ•°æ®ä¸­ååºåˆ—åŒ– QVector<SnakeState> å¯¹è±¡
     static QVector<SnakeState> deserializeQVector(const QByteArray &data);
-
 };
-
-inline uint qHash(const SnakeState &state);
 
 #endif // UTILS_H

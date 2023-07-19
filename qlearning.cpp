@@ -7,76 +7,72 @@
 
 QLearning::QLearning(QObject *parent)
 {}
-// 实现 QLearning 类中的 train() 函数
+
+// QLearning算法的训练函数，用于训练智能体学习最佳策略
 void QLearning::train(SnakeGame& game, int numEpisodes, double learningRate, double discountFactor, double explorationProb)
 {
-    // 初始化随机数种子
-    // 创建一个新的 QRandomGenerator 实例
     QRandomGenerator randomGenerator(QRandomGenerator::global()->generate());
     randomGenerator.seed(QTime::currentTime().msec());
-//    randomGenerator.seed(0);
+    //    randomGenerator.seed(0);
 
-    // 开始执行 Q 学习算法
     for (int episode = 0; episode < numEpisodes; ++episode)
     {
-        // 重置游戏状态
-        game.resetCurrentMode();
+        game.resetCurrentMode(); // 重置当前游戏模式，开始新的一局游戏
 
-        while (!game.isGameOver())
+        while (!game.isGameOver()) // 在游戏没有结束的情况下进行训练
         {
-            // 获取当前游戏状态
-            SnakeState currentState = game.getCurrentSnakeState();
+            SnakeState currentState = game.getCurrentSnakeState(); // 获取当前贪吃蛇的状态
 
-            // 选择动作
             int action;
             if (qTable.contains(currentState) && qTable[currentState].contains((int)SnakeAction::ActionUp))
             {
-                // 根据贪婪策略选择动作
+                // 如果当前状态已经在Q表中存在，则根据贪心策略或者随机策略选择动作
                 if (randomGenerator.generateDouble() < explorationProb)
                 {
-                    // 探索性动作
+                    // 随机选择动作
                     action = randomGenerator.bounded(4);
                 }
                 else
                 {
-                    // 贪婪动作
+                    // 根据贪心策略选择最优动作
                     action = qTable[currentState].key(qTable[currentState].values().at(0));
                 }
             }
             else
             {
-                // 随机选择动作
+                // 如果当前状态在Q表中不存在，则随机选择动作
                 action = randomGenerator.bounded(4);
             }
 
-            // 执行动作并获取奖励
-            double reward = game.executeQLearingAction(action);
+            double reward = game.executeQLearingAction(action); // 执行选择的动作并获取奖励
 
-            // 获取下一个状态
-            SnakeState nextState = game.getCurrentSnakeState();
+            SnakeState nextState = game.getCurrentSnakeState(); // 获取执行动作后的下一个状态
 
-            // 更新 Q 表
             if (!qTable.contains(currentState))
             {
+                // 如果当前状态不在Q表中，则在Q表中新建该状态的记录
                 qTable[currentState] = QHash<int, double>();
             }
 
             if (!qTable[nextState].contains((int)SnakeAction::ActionUp))
             {
+                // 如果下一个状态不在Q表中，则在Q表中新建该状态的记录
                 qTable[nextState] = QHash<int, double>();
             }
 
-            double maxNextQValue = qTable[nextState].isEmpty() ? 0 : qTable[nextState].values().at(0);
-            double currentQValue = qTable[currentState][action];
-            double updatedQValue = currentQValue + learningRate * (reward + discountFactor * maxNextQValue - currentQValue);
-            qTable[currentState][action] = updatedQValue;
+            double maxNextQValue = qTable[nextState].isEmpty() ? 0 : qTable[nextState].values().at(0); // 下一个状态的最大Q值
+            double currentQValue = qTable[currentState][action]; // 当前状态执行当前动作的Q值
+            double updatedQValue = currentQValue + learningRate * (reward + discountFactor * maxNextQValue - currentQValue); // 更新Q值
+            qTable[currentState][action] = updatedQValue; // 更新Q表中的Q值
         }
+
         QString autoSaveFilename = "./qTable/SnakeGameQTable_E" + QString::number(episode) + ".dat";
         qDebug() << "epoch " + QString::number(episode);
-        if((episode%500) == 0)saveQTableToFile(autoSaveFilename);
+        if((episode%500) == 0)saveQTableToFile(autoSaveFilename); // 每500个epoch自动保存Q表到文件
     }
 }
 
+// 从文件中加载Q表
 QLearningTable QLearning::loadQTableFromFile(const QString &filename)
 {
     QLearningTable table;
@@ -91,6 +87,7 @@ QLearningTable QLearning::loadQTableFromFile(const QString &filename)
     return table;
 }
 
+// 将Q表保存到文件
 void QLearning::saveQTableToFile(const QString& filename) const
 {
     QFile file(filename);
@@ -102,7 +99,7 @@ void QLearning::saveQTableToFile(const QString& filename) const
     }
 }
 
-
+// 根据Q表找到当前状态下的最优动作
 SnakeDirection QLearning::findPath(const SnakeState& currentState)
 {
     if (qTable.contains(currentState) && !qTable[currentState].isEmpty())
@@ -123,6 +120,5 @@ SnakeDirection QLearning::findPath(const SnakeState& currentState)
         return (SnakeDirection)bestAction;
     }
 
-    // 如果 Q 表中没有当前状态的数据，随机选择一个动作
     return SnakeDirection::Up;
 }
