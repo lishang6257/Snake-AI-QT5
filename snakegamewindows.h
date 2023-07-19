@@ -56,6 +56,8 @@ private:
 
     // 启动特定游戏模式的贪吃蛇游戏
     void startSnakeGameMode(GameMode gm, int gameTimeInterval = 10);
+    void drawSnakeHead(QPainter &painter, SnakeDirection snakeDirection = SnakeDirection::Up);
+    void drawSnakePath(QPainter &painter, QVector<QPoint> &path, QColor c);
 
     // 更新贪吃蛇游戏状态
     void updateSnakeGame();
